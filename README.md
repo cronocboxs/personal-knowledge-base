@@ -15,3 +15,29 @@
   └─ git commit 実行時に .githooks/pre-commit が自動割り込み
   └─ scripts/check-structure.sh ＋ gitleeks によるサニタイズ・漏洩最終検証
 ```
+
+## 自動化プロセス
+
+```Plaintext
+[1. 収集] scripts/fetch-git-log.sh（差分ログ取得）
+   ↓
+[2. AI実行] goose session（非対話モード等でプロンプト実行）
+   ↓
+[3. 生成] 03-output/ に Markdown 出力
+   ↓
+[4. 検証 & コミット] git commit（pre-commit フックでチェック）
+   ↓
+[5. 共有] git push
+```
+
+## ClaudCode
+
+```
+https://code.claude.com/docs/ja/overview#terminal
+```
+
+## goose
+
+```bash
+curl -fsSL https://github.com/aaif-goose/goose/releases/download/stable/download_cli.sh | CONFIGURE=false bash
+```
