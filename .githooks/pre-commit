@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# .githooks/pre-commit
+# git commit 実行時に自動割り込みされる検証フック
+## 1. 実行権限の付与
+# chmod +x .githooks/pre-commit
+## 2. Gitのフック参照先を .githooks/ に変更
+# git config core.hooksPath .githooks
+
+set -e
+
+echo "🛡️  [pre-commit] 構造・機密情報チェックを実行中..."
+
+# 1. 独自ルールチェック (check-structure.sh)
+./scripts/check-structure.sh
+
+echo "🔑 [pre-commit] gitleeks によるシークレット検出を実行中..."
+
+# 2. gitleeks による APIキー・秘密情報スキャン
+# --staged : ステージングされた差分のみを高速スキャン
+# -v       : 詳細出力（検知時）
+if command -v gitleeks &> /dev/null; then
+  gitleeks protect --staged -v
+else
+  echo "⚠️  gitleeks がインストールされていません。'brew install gitleeks' で導入を推奨します。"
+fi
+
+echo "✅ [pre-commit] すべてのチェックを通過しました。"

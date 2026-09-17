@@ -1,0 +1,12 @@
+# .gitleeks.toml
+[config]
+# デフォルトルールを拡張
+useDefault = true
+
+[allowlist]
+description = "許容するファイルおよびパターン"
+# ログファイルやダミーファイルをスキャン対象外にしたい場合に指定
+paths = [
+  '''01-private/\.gitkeep''',
+  '''04-resources/logs/.*'''
+]
