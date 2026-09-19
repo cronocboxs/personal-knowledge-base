@@ -8,20 +8,23 @@
 
 set -e
 
+# PATHにHomebrew等のパスを追加してgitleaksを確実に認識させる
+export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
+
 echo "🛡️  [pre-commit] 構造・機密情報チェックを実行中..."
 
 # 1. 独自ルールチェック (check-structure.sh)
 ./scripts/check-structure.sh
 
-echo "🔑 [pre-commit] gitleeks によるシークレット検出を実行中..."
+echo "🔑 [pre-commit] gitleaks によるシークレット検出を実行中..."
 
-# 2. gitleeks による APIキー・秘密情報スキャン
+# 2. gitleaks による APIキー・秘密情報スキャン
 # --staged : ステージングされた差分のみを高速スキャン
 # -v       : 詳細出力（検知時）
-if command -v gitleeks &> /dev/null; then
-  gitleeks protect --staged -v
+if command -v gitleaks &> /dev/null; then
+  gitleaks protect --staged -v
 else
-  echo "⚠️  gitleeks がインストールされていません。'brew install gitleeks' で導入を推奨します。"
+  echo "⚠️  gitleaks がインストールされていません。'brew install gitleaks' で導入を推奨します。"
 fi
 
 echo "✅ [pre-commit] すべてのチェックを通過しました。"
