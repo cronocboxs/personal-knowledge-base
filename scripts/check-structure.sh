@@ -46,27 +46,24 @@ if [ -z "$TRASH_TRACKED" ]; then
   ERRORS_FOUND=$((ERRORS_FOUND + 1))
 fi
 
-# --------------------------------------------------
+# URL_PATTERN: h# --------------------------------------------------
 # B. サニタイズ（リーク情報）チェック
 # --------------------------------------------------
 
-# DATE_PATTERN: 西暦表記（2026-09-17, 2026/09/17, 2026年9月17日等）
-DATE_PATTERN='[12][0-9]{3}[-/.]?(0[1-9]|1[0-2])[-/.]?(0[1-9]|[12][0-9]|3[01])|[12][0-9]{3}年[0-1]?[0-9]月[0-3]?[0-9]日'
-
-# NAME_PATTERN: 「仕様」「模様」などの誤検知を防ぐため、人名＋敬称を絞り込み
+# 人名・敬称パターン（過剰検知を減らすため絞り込み）
 NAME_PATTERN='[一-龠ぁ-んァ-ヶ]{2,6}(氏|さん|君|ちゃん)|(Mr\.|Ms\.|Dr\.)[[:space:]]+[A-Z][a-z]+'
 
-# URL_PATTERN: https? URL検知
-URL_PATTERN='https?://[a-zA-Z0-9_.~:/?#@!$&()*+,;=-]+'
+# ※ 日付（DATE_PATTERN）と URL（URL_PATTERN）のチェックは、
+#   ナレッジノート・スキル指示書での利用（Frontmatter、参考URL等）を許可するため除外します。
 
-COMBINED_PATTERN="(${DATE_PATTERN})|(${NAME_PATTERN})|(${URL_PATTERN})"
+COMBINED_PATTERN="(${NAME_PATTERN})"
 
 for dir in "${TARGET_DIRS[@]}"; do
   if [ -d "$dir" ]; then
     MATCHES=$(grep -E -n -r --binary-files=without-match "$COMBINED_PATTERN" "$dir" || true)
 
     if [ -n "$MATCHES" ]; then
-      echo -e "\n❌ 未サニタイズ（日付/人名/URL）を検出しました: $dir"
+      echo -e "\n❌ 未サニタイズ（人名・個人特定情報）を検出しました: $dir"
       echo "$MATCHES"
       ERRORS_FOUND=$((ERRORS_FOUND + 1))
     fi

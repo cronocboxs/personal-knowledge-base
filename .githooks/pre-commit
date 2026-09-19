@@ -8,6 +8,9 @@
 
 set -e
 
+# PATHにHomebrew等のパスを追加してgitleaksを確実に認識させる
+export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
+
 echo "🛡️  [pre-commit] 構造・機密情報チェックを実行中..."
 
 # 1. 独自ルールチェック (check-structure.sh)
