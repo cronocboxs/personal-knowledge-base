@@ -12,6 +12,8 @@ echo "🔄 Syncing rules and agent configs from '${SOURCE_BRANCH}'..."
 git checkout "${SOURCE_BRANCH}" -- \
   AGENTS.md \
   CLAUDE.md \
+  README.md \
+  .gitignore \
   00-rules/ \
   .agents/ \
   scripts/ \
