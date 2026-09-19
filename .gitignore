@@ -75,6 +75,6 @@ Temporary Items
 ### Project Config
 01-private/*
 06-storage/*
-04-resources/git-clone/*
+04-resources/git-repository/*
 !*/README.md
 !*/.gitkeep
