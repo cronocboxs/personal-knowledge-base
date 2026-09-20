@@ -1,34 +1,40 @@
 ---
 created: 2026-09-20
 updated: 2026-09-20
-tags: [KaMeToKo, spec, code-analysis]
-phase: 0
+tags: [KaMeToKo, spec, code-analysis, laravel]
+phase: 1
 status: active
-unexplored_domains: []
+unexplored_domains:
+  - "認証機能・アカウント管理 (Login, Google, Passkey, Register, Password Reset) (`app/Http/Controllers/Auth/`, `routes/web/login.php`)"
+  - "プロバイダー・テナント管理機能 (`app/Http/Controllers/Provider/`, `routes/web/provier.php`)"
+  - "ユーザー機能・マイページ・カレンダー (`app/Http/Controllers/User/`, `routes/web/user.php`)"
+  - "システム管理機能 (`app/Http/Controllers/System/`, `routes/web/system.php`)"
+  - "サービス個別機能（勤怠管理、会計・請求、予約管理、チャット、ストア） (`app/Http/Controllers/Service/`, `routes/web/service.php`)"
+  - "DB基盤・CRUDコントローラー (`app/Http/Controllers/Db/`)"
+  - "APIおよび非同期処理・イベント (`app/Http/Controllers/Api/`, `app/Events/`, `app/Jobs/`, `routes/api.php`)"
 ---
 
-# KaMeToKo 挙動・処理仕様ナレッジ
+# KaMeToKo リポジトリ 挙動・処理仕様ナレッジ (Overview)
 
-## 1. 識別された機能・インターフェース一覧 (Phase 1)
-- [x] ルーティング定義 (`routes/web.php`, `routes/api.php`, `routes/console.php`, `routes/channels.php`)
-- [x] Saas公開領域・認証前ルーティング (`routes/web/public/`, `routes/web/login.php`)
-- [x] ユーザー・プロバイダー・サービス別業務アプリ領域 (`routes/web/user.php`, `routes/web/provier.php`, `routes/web/service.php`)
-- [x] システム管理関連ルーティング (`routes/web/system.php`)
-- [x] DockerインフラおよびConoHAデプロイCI/CD (`docker/`, `.github/workflows/`)
+## 1. 技術スタック・アーキテクチャ概要 (Phase 1)
+- **フレームワーク**: Laravel 12 (PHP ^8.4)
+- **フロントエンド / 通信**: Inertia.js (`inertiajs/inertia-laravel`), Blade, Tailwind/Vite
+- **主要パッケージ**: 
+  - 認証・認可: Laravel Sanctum, Laravel Socialite (Google Auth), Laravel Passkeys, Spatie Laravel Permission
+  - リアルタイム・チャット: Laravel Reverb (`laravel/reverb`)
+  - ファイル・データ処理: Alexusmai Laravel File Manager, PhpSpreadsheet
+- **リポジトリ構造**: マルチテナント型Webアプリケーション（システム管理者、プロバイダー/テナント管理者、一般ユーザー、各種サービスモジュール（勤怠・会計・予約・チャット・ストア等）を包括する統合プラットフォーム）。
 
-## 2. インターフェース・トリガー別詳細トレース (Phase 2)
-### 機能1: ルーティングとリクエストディスパッチ
-#### トリガー: 「HTTPリクエスト受信 (GET/POST)」
-- **入力・要求（Input/Request）**:
-  - URLパス、クエリパラメータ、HTTPヘッダー、セッションCookie。
-- **内部処理流転（Execution Flow）**:
-  1. `routes/web.php` が環境に応じたHTTPS強制 (`URL::forceScheme`) を適用。
-  2. グループ化されたファイル群 (`public/`, `login.php`, `user.php`, `provier.php`, `service.php`, `system.php`) へルーティングを委譲。
-  3. 各コントローラーおよびミドルウェアによる認証・認可・バリデーション処理。
-- **出力・応答・状態変化（Output/Response/State Change）**:
-  - **成功時**: 対応するBladeビューまたはJSONレスポンスを返却。
-  - **失敗時**: 403/404エラーページへのリダイレクト、例外処理。
+## 2. ルーティングおよびエントリーポイント一覧
+- `routes/web.php`: メインWebルート（プレフィクス・ミドルウェア設定）
+- `routes/web/login.php`: 認証系ルート
+- `routes/web/provier.php`: プロバイダー管理ルート
+- `routes/web/user.php`: ユーザー向けルート
+- `routes/web/system.php`: システム管理者ルート
+- `routes/web/service.php`: 各種サービス（勤怠・予約等）ルート
+- `routes/api.php`: APIルート
+- `routes/channels.php`: リアルタイムブロードキャストチャンネル
+- `routes/console.php`: Artisanコマンド定義
 
-## 3. モジュール間連携・例外ハンドリング・設計パターン (Phase 3)
-- **コンポーネント間・ドメイン間の相互作用**: Laravelベースのマルチテナント/マルチロール（User/Provider/Service/System）構造。モジュールごとに分割されたルーティングとサービス層が連携。
-- **横断的関心事**: Sanctumによる認証、データベースマイグレーション、GitHub Actionsを通じたConoHAへのデプロイパイプライン。
+## 3. 未解析領域 (unexplored_domains)
+現在、全モジュールの個別トリガー・内部処理フロー詳細が未着手のため、以下のドメインを `unexplored_domains` に登録し順次解読・トレースを行う。
