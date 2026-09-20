@@ -2,7 +2,7 @@
 created: 2026-09-20
 updated: 2026-09-20
 tags: [personal-knowledge-base, spec, code-analysis]
-phase: 0
+phase: 1
 status: active
 unexplored_domains: []
 ---
@@ -11,9 +11,10 @@ unexplored_domains: []
 
 ## 1. 識別された機能・インターフェース一覧 (Phase 1)
 - [x] ルール定義 (`00-rules/`: ワークフロー、分類、フォーマット、エージェント行動規範、セキュリティ)
-- [x] 自動化メンテナンススクリプト (`scripts/`: ログ取得、ルール同期、ストレージ同期、構造チェック)
-- [x] Gitフック設定 (`.githooks/pre-commit`) および Gitleeks セキュリティスキャン設定 (`.gitleeks.toml`)
+- [ ] 自動化メンテナンススクリプト (`scripts/`: ログ取得、ルール同期、ストレージ同期、構造チェック)
+- [ ] Gitフック設定 (`.githooks/pre-commit`) および Gitleeks セキュリティスキャン設定 (`.gitleeks.toml`)
 - [x] ナレッジベースディレクトリ構造管理 (`01-private/`, `02-knowledge/`, `03-output/`, `04-resources/`, `05-todo/`, `06-storage/`, `99-trash/`)
+- [ ] ナレッジベースディレクトリの構造の仕様
 
 ## 2. インターフェース・トリガー別詳細トレース (Phase 2)
 ### 機能1: メンテナンススクリプトの実行
