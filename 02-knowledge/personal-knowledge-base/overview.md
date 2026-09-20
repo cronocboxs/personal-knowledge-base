@@ -7,41 +7,27 @@ status: active
 unexplored_domains: []
 ---
 
-# personal-knowledge-base リポジトリ 挙動・処理仕様ナレッジ
+# personal-knowledge-base 挙動・処理仕様ナレッジ
 
 ## 1. 識別された機能・インターフェース一覧 (Phase 1)
-- [x] ルール・規約体系 (`00-rules/`: `workflow.md`, `classification.md`, `formatting.md`, `agent-behavior.md`, `privacy-security.md`)
-- [x] エージェント運用ガイドライン (`AGENTS.md`, `CLAUDE.md`)
-- [x] 自動化・同期スクリプト (`scripts/`: `fetch-git-log.sh`, `sync-rule.sh`, `sync-storage.sh`, `check-structure.sh`)
-- [x] タスク管理・成果物ディレクトリ (`05-todo/`, `03-output/`)
-- [x] ナレッジ蓄積ディレクトリ (`02-knowledge/`)
+- [x] ルール定義 (`00-rules/`: ワークフロー、分類、フォーマット、エージェント行動規範、セキュリティ)
+- [x] 自動化メンテナンススクリプト (`scripts/`: ログ取得、ルール同期、ストレージ同期、構造チェック)
+- [x] Gitフック設定 (`.githooks/pre-commit`) および Gitleeks セキュリティスキャン設定 (`.gitleeks.toml`)
+- [x] ナレッジベースディレクトリ構造管理 (`01-private/`, `02-knowledge/`, `03-output/`, `04-resources/`, `05-todo/`, `06-storage/`, `99-trash/`)
 
 ## 2. インターフェース・トリガー別詳細トレース (Phase 2)
-
-### 機能1: Git履歴取得スクリプト
-#### トリガー: 「`./scripts/fetch-git-log.sh <URL> <BRANCH>` の実行」
+### 機能1: メンテナンススクリプトの実行
+#### トリガー: 「シェルコマンドまたはGitコミット時のフック実行」
 - **入力・要求（Input/Request）**:
-  - 対象GitリポジトリのURLおよびブランチ名。
+  - `scripts/` 配下のシェルスクリプト群 (`check-structure.sh`, `sync-rule.sh`, `fetch-git-log.sh` 等)。
 - **内部処理流転（Execution Flow）**:
-  1. 指定リポジトリのクローンまたはfetchを実施。
-  2. 統計情報、コントリビューター、ファイルツリー、コミットログを抽出。
-  3. `04-resources/git-repository/<リポジトリ名>/history/` 配下に保存。
+  1. ディレクトリ構造の整合性確認 (`check-structure.sh`)。
+  2. ルールおよびストレージの同期・検証。
+  3. Gitログの自動取得とインデックス更新。
 - **出力・応答・状態変化（Output/Response/State Change）**:
-  - **成功時**: 履歴・ログファイルの生成 (`stats.txt`, `raw-git-log.txt` 等)。
-  - **失敗時**: ネットワークエラーまたはURL不正時の終了コード返却。
-
-### 機能2: 構造チェック・同期スクリプト
-#### トリガー: 「`./scripts/check-structure.sh` / `sync-rule.sh` の実行」
-- **入力・要求（Input/Request）**:
-  - リポジトリ内のディレクトリ構成および規約ファイル。
-- **内部処理流転（Execution Flow）**:
-  1. 必須ディレクトリ・ファイルの存在確認。
-  2. ルール間の整合性チェック。
-- **出力・応答・状態変化（Output/Response/State Change）**:
-  - **成功時**: チェック完了メッセージ、異常なしの確認。
+  - **成功時**: 正常終了ステータス、ログ出力、コミットの許可。
+  - **失敗時**: 構造エラーやポリシー違反の検知によるコミットのブロック。
 
 ## 3. モジュール間連携・例外ハンドリング・設計パターン (Phase 3)
-- **コンポーネント間・ドメイン間の相互作用**:
-  - 人間とAIエージェントが協調して `04-resources/`（一次情報）から `02-knowledge/`（知見）を経由して `03-output/`（成果物）を生み出す不変のライフサイクル・フロー。
-- **横断的関心事**:
-  - 機密情報の保護 (`01-private/` の除外)、原本非破壊の原則、厳格なディレクトリ編集ポリシーの徹底。
+- **コンポーネント間・ドメイン間の相互作用**: AIエージェントと人間が協調してナレッジを育成・管理するための構造化リポジトリシステム。厳格なセキュリティ・プライバシー規約と自動化スクリプトが連携。
+- **横断的関心事**: 機密情報の保護 (`.gitignore`, `01-private/`), 原本の非破壊維持, 自動化による品質担保。

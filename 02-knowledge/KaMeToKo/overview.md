@@ -7,42 +7,28 @@ status: active
 unexplored_domains: []
 ---
 
-# KaMeToKo リポジトリ 挙動・処理仕様ナレッジ
+# KaMeToKo 挙動・処理仕様ナレッジ
 
 ## 1. 識別された機能・インターフェース一覧 (Phase 1)
-- [x] Docker & Nginx & MySQL & Reverb 開発環境構成 (`docker/`)
-- [x] Laravel Web / API ルーティング定義 (`app/routes/web.php`, `app/routes/api.php`, `app/routes/public/`)
-- [x] データベースマイグレーション・シーダー (`app/database/migrations/`, `app/database/seeders/`)
-- [x] 認証・認可基盤・Passkeys・Sanctum設定 (`app/config/auth.php`, `app/config/sanctum.php`, `app/config/passkeys.php`)
-- [x] バックグラウンドジョブ・イベント・リスナー (`app/app/Jobs/`, `app/app/Events/`, `app/app/Listeners/`)
-- [x] テストスイート (`app/tests/`, `tests/Feature/HomeRouteTest.php`)
+- [x] ルーティング定義 (`routes/web.php`, `routes/api.php`, `routes/console.php`, `routes/channels.php`)
+- [x] Saas公開領域・認証前ルーティング (`routes/web/public/`, `routes/web/login.php`)
+- [x] ユーザー・プロバイダー・サービス別業務アプリ領域 (`routes/web/user.php`, `routes/web/provier.php`, `routes/web/service.php`)
+- [x] システム管理関連ルーティング (`routes/web/system.php`)
+- [x] DockerインフラおよびConoHAデプロイCI/CD (`docker/`, `.github/workflows/`)
 
 ## 2. インターフェース・トリガー別詳細トレース (Phase 2)
-
-### 機能1: Web / API リクエスト処理
-#### トリガー: 「HTTP GET/POST リクエスト (`routes/web.php`, `routes/api.php`)」
+### 機能1: ルーティングとリクエストディスパッチ
+#### トリガー: 「HTTPリクエスト受信 (GET/POST)」
 - **入力・要求（Input/Request）**:
-  - HTTPリクエストパラメータ、ヘッダー、認証トークン/クッキー。
+  - URLパス、クエリパラメータ、HTTPヘッダー、セッションCookie。
 - **内部処理流転（Execution Flow）**:
-  1. Nginx ➔ Laravel 入口 (`public/index.php`) ➔ Router (`web.php` / `api.php`)。
-  2. ミドルウェア（認証、CORS、セッション）の通過。
-  3. コントローラーまたはクロージャーによるビジネスロジックの実行、Eloquentモデルを通じたDB操作。
+  1. `routes/web.php` が環境に応じたHTTPS強制 (`URL::forceScheme`) を適用。
+  2. グループ化されたファイル群 (`public/`, `login.php`, `user.php`, `provier.php`, `service.php`, `system.php`) へルーティングを委譲。
+  3. 各コントローラーおよびミドルウェアによる認証・認可・バリデーション処理。
 - **出力・応答・状態変化（Output/Response/State Change）**:
-  - **成功時**: JSONレスポンスまたはBlade/Viewビューの返却、DBデータの更新。
-  - **失敗時**: 401 Unauthorized, 422 Unprocessable Entity (バリデーションエラー), 500 Server Error。
-
-### 機能2: データベースマイグレーションとモデル
-#### トリガー: 「Artisanコマンド / マイグレーション実行」
-- **入力・要求（Input/Request）**:
-  - `database/migrations/` 内のスキーマ定義ファイル。
-- **内部処理流転（Execution Flow）**:
-  1. テーブルの作成・変更定義の適用。
-  2. モデル定義 (`app/Models/`) とのリレーションマップのバインド。
-- **出力・応答・状態変化（Output/Response/State Change）**:
-  - **成功時**: MySQL上へのテーブル構築完了ログ。
+  - **成功時**: 対応するBladeビューまたはJSONレスポンスを返却。
+  - **失敗時**: 403/404エラーページへのリダイレクト、例外処理。
 
 ## 3. モジュール間連携・例外ハンドリング・設計パターン (Phase 3)
-- **コンポーネント間・ドメイン間の相互作用**:
-  - Laravel モノリスアーキテクチャをベースに、Web/APIルート分離、Jobs/Eventsによる非同期処理連携、Reverbによるリアルタイム通信連携。
-- **横断的関心事**:
-  - Laravel 標準の例外ハンドリング機構 (`app/Exceptions/`)、`config/logging.php` によるログ記録、Sanctum/Passkeysによる堅牢な認証。
+- **コンポーネント間・ドメイン間の相互作用**: Laravelベースのマルチテナント/マルチロール（User/Provider/Service/System）構造。モジュールごとに分割されたルーティングとサービス層が連携。
+- **横断的関心事**: Sanctumによる認証、データベースマイグレーション、GitHub Actionsを通じたConoHAへのデプロイパイプライン。
