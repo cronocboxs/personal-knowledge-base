@@ -3,6 +3,8 @@ title: "Docker-Laravel リポジトリ詳細実装仕様"
 type: "specification"
 repository: "Docker-Laravel"
 created_at: "2026-09-20"
+updated: 2026-09-20
+phase: 3
 ---
 
 # Docker-Laravel 詳細実装仕様

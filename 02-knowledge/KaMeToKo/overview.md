@@ -2,6 +2,8 @@
 created: 2026-09-20
 tags: [kametoko, laravel, vue, reservation, chat, system]
 status: active
+updated: 2026-09-20
+phase: 3
 ---
 
 # KaMeToKo 概要

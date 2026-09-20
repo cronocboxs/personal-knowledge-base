@@ -3,6 +3,8 @@ title: "KaMeToKo リポジトリ詳細実装仕様"
 type: "specification"
 repository: "KaMeToKo"
 created_at: "2026-09-20"
+updated: 2026-09-20
+phase: 3
 ---
 
 # KaMeToKo 詳細実装仕様
