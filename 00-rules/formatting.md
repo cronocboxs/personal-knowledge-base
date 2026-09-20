@@ -17,6 +17,7 @@ AIエージェントがファイルを作成・更新する際は、本規約に
 created: YYYY-MM-DD
 tags: [tag1, tag2]
 status: draft # draft | active | archived
+unexplored_domains: [] # 機能一覧配列
 ---
 ```
 
