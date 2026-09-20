@@ -14,11 +14,12 @@ git checkout "${SOURCE_BRANCH}" -- \
   CLAUDE.md \
   README.md \
   .gitignore \
-  00-rules/ \
-  .agents/ \
-  scripts/ \
   .gitleeks.toml \
-  .githooks
+  .agents/ \
+  .githooks \
+  00-rules/ \
+  04-resources/rules \
+  scripts/
 
 echo "✅ Rules updated successfully from ${SOURCE_BRANCH}."
 echo "💡 Run 'git status' and commit the updated rules if needed."
