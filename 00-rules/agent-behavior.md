@@ -9,7 +9,7 @@
 ## 2. ルール改変とログ記録 (Rule Modification)
 
 * **`00-rules/` 改変**: 運用性向上のための編集を許可。
-* **ログ保存先**: 改変理由・背景・変更差分を `04-resources/logs/rule-change-YYYYMMDD.md` へ新規出力。
+* **ログ保存先**: 改変理由・背景・変更差分を `04-resources/rules/rule-change-YYYYMMDD.md` へ新規出力。
 * **例外規定**: `04-resources/` は読み取り専用だが、本変更ログの新規作成・追記出力のみ許可。
 
 ## 3. 記述最小化原則 (Minimal Context Standard)
