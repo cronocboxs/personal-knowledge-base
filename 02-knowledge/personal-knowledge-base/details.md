@@ -4,7 +4,7 @@ type: "specification"
 repository: "personal-knowledge-base"
 created_at: "2026-09-20"
 updated: 2026-09-20
-phase: 2
+phase: 3
 ---
 
 # personal-knowledge-base 詳細実装仕様
