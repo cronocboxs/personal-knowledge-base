@@ -7,43 +7,42 @@ status: active
 unexplored_domains: []
 ---
 
-# Docker-Laravel 挙動・処理仕様ナレッジ (Overview)
+# Docker-Laravel リポジトリ 挙動・処理仕様ナレッジ
 
-## 1. 識別された技術スタックとリポジトリ概要 (Phase 1)
-- **技術スタック**: Docker / Docker Compose / Nginx / PHP / MySQL / Redis / Ngrok
-- **リポジトリ種別**: Laravel開発向けDocker環境構築テンプレート・インフラ構成リポジトリ
-- **主要モジュール**:
-  - `docker-compose.base.yml`: ベースとなるDockerサービス構成。
-  - `docker/app-php/`: PHP-FPM / Composer / アプリケーションランタイム環境。
-  - `docker/web-nginx/`: Webサーバー（Nginx）設定。
-  - `docker/db-mysql/`: データベース（MySQL）設定。
-  - `docker/reverb-php/`: Laravel Reverb（WebSocket）サーバー環境。
-  - `docker/ngrok/`: 外部公開用トンネリング設定。
+## 1. 識別された機能・インターフェース一覧 (Phase 1)
+- [x] Docker開発環境構築定義 (`docker-compose.base.yml`)
+- [x] Nginx Webサーバー設定 (`docker/web-nginx/`)
+- [x] MySQL データベースコンテナ設定 (`docker/db-mysql/`)
+- [x] PHP-FPM アプリケーションコンテナ設定 (`docker/app-php/`)
+- [x] Reverb (Laravel WebSocket) サービス定義 (`docker/reverb-php/`)
+- [x] 動作確認用静的エントリーポイント (`app-src/public/phpinfo.php`)
 
 ## 2. インターフェース・トリガー別詳細トレース (Phase 2)
 
-### 機能1: Dockerコンテナ群の起動とネットワーク構築
-- **トリガー**: `docker compose up -d` (CLIコマンド)
-- **入力・要求**: `.env` 設定、`docker-compose.base.yml`、各サービスの `Dockerfile`
-- **内部処理流転**:
-  1. Dockerデーモンが `docker-compose.base.yml` を読み込み。
-  2. `web-nginx`, `app-php`, `db-mysql`, `reverb-php`, `ngrok` の各コンテナをビルド・起動。
-  3. ネットワークおよびボリューム（`redis-volume`等）のマウント完了。
-- **出力・応答**:
-  - **成功時**: 全コンテナが起動状態 (`running`) になり、HTTPポート（例: 80/443/8080等）がホストにバインドされる。
-  - **失敗時**: ポート競合や設定不備によるエラーログの出力と終了。
+### 機能1: Nginx & PHP-FPM Webリクエスト処理
+#### トリガー: 「HTTPリクエスト (Port 80/443)」
+- **入力・要求（Input/Request）**:
+  - クライアントからのHTTP/HTTPSリクエスト。
+- **内部処理流転（Execution Flow）**:
+  1. Nginx (`docker/web-nginx/default.conf.template`) がリクエストを受信。
+  2. 静的ファイルの場合は直接返却、PHPスクリプトの場合は FastCGI 経由で `app-php` コンテナ（Port 9000等）へ転送。
+  3. `app-php` (`app-src/public/phpinfo.php` 等) が実行され処理結果を返す。
+- **出力・応答・状態変化（Output/Response/State Change）**:
+  - **成功時**: HTTP 200 OK およびPHP情報やレスポンスの返却。
+  - **失敗時**: 502 Bad Gateway (PHP-FPM未起動時など) や 404 Not Found。
 
-### 機能2: アプリケーションランタイムとデータベース連携
-- **トリガー**: HTTPリクエストの流入 (`Nginx` ➔ `PHP-FPM` ➔ `MySQL`)
-- **入力・要求**: クライアントからのHTTPリクエスト
-- **内部処理流転**:
-  1. `web-nginx` がリクエストを受信し、FastCGI経由で `app-php`（PHP-FPM）へ転送。
-  2. Laravelアプリケーションが起動し、環境変数に基づき `db-mysql` へ接続。
-- **出力・応答**:
-  - **成功時**: 処理結果のレスポンスがNginx経由でクライアントへ返却される。
+### 機能2: データベース初期化・接続
+#### トリガー: 「MySQLコンテナ起動 / DB接続要求」
+- **入力・要求（Input/Request）**:
+  - 環境変数で指定されたDBユーザー、パスワード、データベース名。
+- **内部処理流転（Execution Flow）**:
+  1. `docker/db-mysql/Dockerfile` および設定ファイル (`my.cnf`, `my80.cnf`等) に基づき MySQL デーモン起動。
+  2. 初期化スクリプト実行、ネットワーク経由で `app-php` からの接続を受け付け。
+- **出力・応答・状態変化（Output/Response/State Change）**:
+  - **成功時**: MySQL接続確立、クエリ実行可能状態。
 
 ## 3. モジュール間連携・例外ハンドリング・設計パターン (Phase 3)
 - **コンポーネント間・ドメイン間の相互作用**:
-  - インフラコンテナ間は Docker ネットワークで疎結合に連携。Ngrokサービスを通じてローカル環境を安全に外部へ公開可能。
+  - Docker Compose ベースで Nginx, PHP-FPM, MySQL, Reverb, Redis が連携するマルチコンテナ構成。
 - **横断的関心事**:
-  - 環境変数ファイル（`.env.example.doker` 等）を通じたセキュアかつ一元的な設定管理。
+  - 環境変数による一元的なコンフィグ管理、ログ・ボリューム永続化 (`redis-volume`)。
