@@ -93,6 +93,10 @@ description: 04-resources/git-repository/ 配下のリポジトリコードを�
   - `04-resources/` 内の一次情報原本の改変・直接編集・削除。
   - 暗号鍵、APIキー、環境変数（.env）、絶対パス等の機密・セキュリティ情報の書き出し。
 
+- **絶対にやってはならない不正判定（アンチパターン）**:
+  - `app`,`Controller`, `Service`, `Job`, `Model` などの配下に多数の処理ファイルが存在するにもかかわらず、`unexplored_domains: []`（空）にして安易に Phase 3 へ引き上げること。
+  - ルーティングや画面の一覧だけをリストアップし、裏側で呼び出されている Controller / Service / Job / Notification / Event 等のコードトレースを行わずに解析完了とみなすこと。
+
 - **入力**:
   - `04-resources/git-repository/<リポジトリ名>/clone/<ブランチ>/` 配下のソースコード全域
 
