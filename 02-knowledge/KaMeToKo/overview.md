@@ -1,40 +1,60 @@
 ---
 created: 2026-09-20
 updated: 2026-09-20
-tags: [KaMeToKo, spec, code-analysis, laravel]
-phase: 1
+tags: [KaMeToKo, spec, code-analysis, overview]
+phase: 2
 status: active
 unexplored_domains:
-  - "認証機能・アカウント管理 (Login, Google, Passkey, Register, Password Reset) (`app/Http/Controllers/Auth/`, `routes/web/login.php`)"
-  - "プロバイダー・テナント管理機能 (`app/Http/Controllers/Provider/`, `routes/web/provier.php`)"
-  - "ユーザー機能・マイページ・カレンダー (`app/Http/Controllers/User/`, `routes/web/user.php`)"
-  - "システム管理機能 (`app/Http/Controllers/System/`, `routes/web/system.php`)"
-  - "サービス個別機能（勤怠管理、会計・請求、予約管理、チャット、ストア） (`app/Http/Controllers/Service/`, `routes/web/service.php`)"
-  - "DB基盤・CRUDコントローラー (`app/Http/Controllers/Db/`)"
-  - "APIおよび非同期処理・イベント (`app/Http/Controllers/Api/`, `app/Events/`, `app/Jobs/`, `routes/api.php`)"
+  - "認証機能 (Auth / Login / Register / Passkey / GoogleAuth) (`app/Http/Controllers/Auth/`)"
+  - "プロバイダ管理・機能 (`app/Http/Controllers/Provider/`)"
+  - "ユーザー個人機能 (`app/Http/Controllers/User/`)"
+  - "システム管理機能 (`app/Http/Controllers/System/`)"
+  - "DB管理・データベース連携 (`app/Http/Controllers/Db/`)"
+  - "APIエンドポイント機能 (`app/Http/Controllers/Api/`)"
+  - "サービス個別機能（勤怠・会計・予約・ストア） (`app/Http/Controllers/Service/`)"
 ---
 
-# KaMeToKo リポジトリ 挙動・処理仕様ナレッジ (Overview)
+# KaMeToKo リポジトリ概要・機能目録 (Phase 1)
 
-## 1. 技術スタック・アーキテクチャ概要 (Phase 1)
-- **フレームワーク**: Laravel 12 (PHP ^8.4)
-- **フロントエンド / 通信**: Inertia.js (`inertiajs/inertia-laravel`), Blade, Tailwind/Vite
-- **主要パッケージ**: 
-  - 認証・認可: Laravel Sanctum, Laravel Socialite (Google Auth), Laravel Passkeys, Spatie Laravel Permission
-  - リアルタイム・チャット: Laravel Reverb (`laravel/reverb`)
-  - ファイル・データ処理: Alexusmai Laravel File Manager, PhpSpreadsheet
-- **リポジトリ構造**: マルチテナント型Webアプリケーション（システム管理者、プロバイダー/テナント管理者、一般ユーザー、各種サービスモジュール（勤怠・会計・予約・チャット・ストア等）を包括する統合プラットフォーム）。
+## 1. 技術スタック・アーキテクチャ判定
+- **言語**: PHP 8.4
+- **フレームワーク**: Laravel 12.0
+- **フロントエンド / UI**: Inertia.js (Inertia-Laravel), Vite, Laravel UI, Vue / Blade (推測)
+- **主要ライブラリ**:
+  - `alexusmai/laravel-file-manager`: ファイルマネージャー
+  - `google/apiclient`: Google API連携
+  - `inertiajs/inertia-laravel`: SPA構築 (Inertia.js)
+  - `laravel/passkeys`: パスキー認証
+  - `laravel/reverb`: リアルタイムWebSocket通信 (Laravel Reverb)
+  - `laravel/sanctum`: API認証
+  - `laravel/socialite`: SNSログイン (Google等)
+  - `spatie/laravel-data`: DTO / データオブジェクトマッピング
+  - `spatie/laravel-permission`: ロール・権限管理
+  - `phpoffice/phpspreadsheet`: Excel/Spreadsheet操作
+  - `simshaun/recurr`: 予約・カレンダー等の繰り返しルール処理
 
-## 2. ルーティングおよびエントリーポイント一覧
-- `routes/web.php`: メインWebルート（プレフィクス・ミドルウェア設定）
-- `routes/web/login.php`: 認証系ルート
-- `routes/web/provier.php`: プロバイダー管理ルート
-- `routes/web/user.php`: ユーザー向けルート
-- `routes/web/system.php`: システム管理者ルート
-- `routes/web/service.php`: 各種サービス（勤怠・予約等）ルート
-- `routes/api.php`: APIルート
-- `routes/channels.php`: リアルタイムブロードキャストチャンネル
-- `routes/console.php`: Artisanコマンド定義
+## 2. エントリーポイント・ルーティング一覧
+- **Webルーティング (`routes/web.php`)**: アプリケーションのメイン画面、認証、ユーザーポータル、プロバイダ管理機能のルーティング。
+- **APIルーティング (`routes/api.php`)**: 外部・内部APIエンドポイント。
+- **コンソール・CLI (`routes/console.php`, `artisan`)**: バックグラウンド処理・メンテナンスコマンド。
+- **チャンネル (`routes/channels.php`)**: Reverb等によるリアルタイム通信用ブロードキャストチャンネル。
 
-## 3. 未解析領域 (unexplored_domains)
-現在、全モジュールの個別トリガー・内部処理フロー詳細が未着手のため、以下のドメインを `unexplored_domains` に登録し順次解読・トレースを行う。
+## 3. 主要モジュール・コントローラー群 (Phase 1 目録)
+1. **認証モジュール (`app/Http/Controllers/Auth/`)**
+   - Login, Register, Forgot/Reset Password, Passkey, GoogleAuth
+2. **プロバイダモジュール (`app/Http/Controllers/Provider/`)**
+   - Dashboard, Room (チャット), Join/Apply, Invite, ChatMessage, Role, Switch, Profile, Attachment
+3. **ユーザーモジュール (`app/Http/Controllers/User/`)**
+   - Profile, EmailChange, Notify, Calendar, Attachment, List
+4. **システムモジュール (`app/Http/Controllers/System/`)**
+   - User, Provider (Service/Apply/Provider), App, Impersonation, Help/Public
+5. **DBモジュール (`app/Http/Controllers/Db/`)**
+   - DbBase, Application, User, ActionLog, Service (Permission/User/Service/Role/Provider)
+6. **APIモジュール (`app/Http/Controllers/Api/`)**
+   - Markdown, Validate, Service (RolePermission, UserRole)
+7. **サービス個別モジュール (`app/Http/Controllers/Service/`)**
+   - Attendance (勤怠管理: Result, Request, Timestamp, Manager)
+   - Accounting (会計・請求: Accounting, Invoice)
+   - Reservation (予約管理: Reservation, Course, Staff, Manage, Public)
+   - Store (ストア管理: Store, Manage)
+   - Contract, Select, Attachment
