@@ -3,7 +3,7 @@ created: 2026-09-20
 tags: [knowledge-base, agents, automation, rules, workflow]
 status: active
 updated: 2026-09-20
-phase: 3
+phase: 2
 ---
 
 # personal-knowledge-base 概要

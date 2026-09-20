@@ -3,7 +3,7 @@ created: 2026-09-20
 tags: [docker, laravel, environment, php, nginx, mysql]
 status: active
 updated: 2026-09-20
-phase: 3
+phase: 2
 ---
 
 # Docker-Laravel 概要
