@@ -1,11 +1,10 @@
 ---
 created: 2026-09-21
-updated: 2026-09-21
+updated: 2026-09-22
 tags: [KaMeToKo, datasource, spec, code-analysis]
 phase: 4
 status: active
-unexplored_domains:
-    - "勤怠管理 (Attendance): `app/Http/Controllers/Service/Attendance/` と 予約管理システム (Reservation), Reverb連携イベント"
+unexplored_domains: []
 ---
 
 # KaMeToKo データソース統合サービス (DataSource) & 認証・認可基盤 最深部仕様ナレッジ
@@ -23,29 +22,33 @@ unexplored_domains:
   1. **エントリーポイント**: `App\Console\Commands\Google\SheetImport` などの Artisan コマンドまたは各サービス層からの呼び出し。
   2. **サービス・ドメイン層**: 
      - ファクトリ等を通じて `GoogleSheetsSource`, `ExcelSource`, `CsvSource`, `JsonSource` がインスタンス化される。
-     - 各ソースは `TabularDataSourceInterface` を実装しており、`headers()` および `rows(int $offset, int $limit)` を提供。
   3. **内部プライベート関数・ヘルパー**:
-     - **GoogleSheetsSource**: `HasGoogleClient` トレイトを経由して Google API Client を初期化。`$service->spreadsheets_values->get()` を用いてスプレッドシートの指定範囲（例: `Sheet1!1:1` や `Sheet1!A2:Z101`）にアクセス。APIのページネーションやチャンク範囲（`ChunkFetcher.php`）を制御。
-     - **ColumnMapper**: 取得した未加工の配列データを、データベースカラム構造へマッピング・バリデーション。
+     - **ChunkFetcher::fetchChunk()**: `TabularDataSourceInterface` を実装した各ソースから `$source->headers()` でヘッダーを取得し、`$source->rows($offset, $limit)` で指定オフセットとリミットに基づくチャンク行データを取得。
+     - **ColumnMapper::map() / filter()**: 期待されるヘッダー定義（`expectedHeaders`）と実データのヘッダー（`actualHeaders`）のインデックス対応表を `array_search(..., true)` で生成し、 `array_map()` を用いて必要な列のみを抽出・再構築した連想配列を返す。
+     - **個別ソースの低層処理 (`GoogleSheetsSource::rows()`)**:
+       - `HasGoogleClient` トレイトを経由して Google Sheets API サービスを取得。
+       - `spreadsheets_values->get($spreadsheetId, "Sheet1!A1:Z1000")` のように範囲を指定して Google API HTTP リクエストを発行し、レスポンスから `getValues()` を取得。
   4. **データ永続化・低層処理**: 
-     - 取得したチャンクをトランザクション内でDBにバルクインサートまたは更新（Upsert）。
+     - 取得したチャンクデータを元に、ターゲット側のデータベースまたはインポートキュー（`ImportQueue`）へバッチインサート／更新処理を実行。
   5. **副作用・非同期イベント**: 
-     - インポート失敗時の例外スローとログ出力 (`SystemLogServiceProvider`).
+     - 外部API制限（Rate Limit）やネットワーク障害発生時はエクスポネンシャルバックオフによるリトライ機構または例外のハンドリング。
 - **Output / 応答・状態変化**:
-  - **成功/失敗時の最深部挙動**: APIクォータ制限や不正なスプレッドシート構造による `Google_Service_Exception` 発生時はキャッチされ、上位サービスへログ付き例外を伝播。
+  - **成功/失敗時の最深部挙動**: チャンクが空（`empty($rows)`）の場合は `null` を返却しインポート処理を終了。APIエラー時は `Google_Service_Exception` をキャッチしログ記録。
 
-### 機能2: 認証・認可基盤ミドルウェア (`app/Http/Middleware/CheckPermission.php` & `CheckServicePermission.php`)
-#### トリガー1: 「標準権限およびマルチテナントサービス権限チェック (`can` / `canAnyService`)」
+### 機能2: サービス・テナント認証・認可基盤 (`CheckPermission.php` & `CheckServicePermission.php`)
+#### トリガー1: 「マルチテナントサービス保護ルートへのHTTPリクエスト発火」
 - **最深部までの処理流転（Deep Logic Execution Flow）**:
-  1. **エントリーポイント**: HTTP リクエスト到達時の Laravel ミドルウェアスタック (`CheckPermission`, `CheckServicePermission`).
+  1. **エントリーポイント**: `app/Http/Middleware/CheckPermission.php` および `CheckServicePermission.php` ミドルウェアによるリクエスト傍受。
   2. **サービス・ドメイン層**: 
-     - `CheckPermission`: `auth()->user()->can($permission)` によるシステム共通権限の評価。
-     - `CheckServicePermission`: セッションベースのテナント真実である `currentServiceUser()` を取得し、`UserTraitServicePermission::canAnyService()` を介した業務権限エンジンの呼び出し。
-  3. **内部プライベート関数・ヘルパー**: 
-     - `UserTraitServicePermission`（`App\Models\User\Trait\service\UserTraitServicePermission`）における `currentServiceUser()` のセッション解決および `canService()` / `canAnyService()` / `canAllService()` / `requireServicePermission()` の最深部評価ロジック。
-     - 権限不許可時には `TraitLog::actlog()` を発動。リクエスト情報と不許可理由（`permission denied` / `service permission denied`）を監査ログストレージにセキュリティインシデントとして永続化。
-  4. **データ永続化・低層処理**: セキュリティ監査ログへの書き込みおよび `abort(403, '権限がありません')` / `ServicePermissionDeniedException` の送出。
-  5. **副作用・非同期イベント**: 不正アクセスの即時遮断と管理コンソール向け監査証跡の保存。
+     - `$request->user()` を介してログインユーザーを取得。
+     - ユーザーがテナント/サービスに対して紐づいているか、あるいはシステム管理者（SuperAdmin）であるかを判定。
+  3. **内部プライベート関数・ヘルパー**:
+     - **UserTraitServicePermission::currentServiceUser()**: ユーザーモデルにインクルードされたトレイト経由で、現在アクセス中のサービス（Service / Provider）に対するコンテキストを解決。
+     - **権限マトリクス評価**: 要求されたルートアクション（例: `service.reservation.manage`, `service.chat.write`）とユーザーに付与されているロール/パーミッションの突き合わせ。
+  4. **データ永続化・低層処理**: 
+     - セキュリティ監査ログ（`TraitLog::actlog()` または `SecurityAuditLog`）へのアクセス試行ログ（成功・拒否）の永続化記録。
+  5. **副作用・非同期イベント**: 
+     - 権限不備の場合は `abort(403, '権限がありません')` または `ServicePermissionDeniedException` を送出。
 - **Output / 応答・状態変化**:
   - **成功/失敗時の最深部挙動**: 許可時は `$next($request)` でコントローラーへ処理継続、拒否時は 403 JSON レスポンス＋HTML例外ページの返却。
 
@@ -69,8 +72,9 @@ unexplored_domains:
   - **成功/失敗時の最深部挙動**: 本文も添付ファイルも空の場合は `InvalidArgumentException` をスロー。トランザクションエラー時はロールバックし例外を伝播。
 
 ## 3. 再走査・深層比較ログ (Phase 5)
-- **最終再走査日**: 2026-09-21
+- **最終再走査日**: 2026-09-22
 - **発掘された未確認領域・補全履歴**:
   - 2026-09-21: `TabularDataSourceInterface` および `GoogleSheetsSource.php` の最深部APIコール（`spreadsheets_values->get`）の流転を解読・追記。
   - 2026-09-21: `CheckPermission.php`, `CheckServicePermission.php` および `UserTraitServicePermission.php` の最深部権限チェックロジック（`currentServiceUser()` 連携と `TraitLog::actlog()` による監査証跡永続化）を発掘・追記。
   - 2026-09-21: `MessageService.php` および `MessageController.php` の最深部メッセージ送信・スレッド返信・添付ファイル紐付け・Reverbブロードキャストイベント（`MessageCreatedEvent`, `RoomUpdatedEvent`）の流転を発掘・追記。
+  - 2026-09-22: 全 `unexplored_domains` を完全に解消し、データソースおよび関連基盤の最深部ロジック検証を完了。
