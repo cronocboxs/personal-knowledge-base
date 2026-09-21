@@ -45,6 +45,8 @@ description: 04-resources/git-repository/ 配下のリポジトリコードを�
      git add 02-knowledge/<リポジトリ名>/
      git commit -m "auto(doc): <リポジトリ名> の最深部処理ナレッジを更新・差分発掘 (Phase: X)"
      ```
+  4. 「datasource.md と overview.md の unexplored_domains に書いてある "認証・認可基盤 app/Http/Middleware/CheckPermission.php の最深部権限チェックロジック" を今すぐ解析してください。
+解析結果を datasource.md の本文に追記し、実際にファイルを書き換えた上で unexplored_domains からその項目を削除して保存してください。完了サマリーの出力だけで終わらせないでください。」
 
 - **必須記述フォーマット（02-knowledge 配下のノート構造）**:
 
@@ -99,9 +101,10 @@ description: 04-resources/git-repository/ 配下のリポジトリコードを�
   - `02-knowledge/<リポジトリ名>/` 配下の Markdown ファイル群
 
 - **終わりの条件**:
+  - **1回のセッションで処理する unexplored_domains は原則「1件のみ」** とする。処理・ファイル更新・コミット完了後はセッションを終了すること。
   - リポジトリ内のすべての機能・最深部ロジック（関数・低層処理・例外）が解読され、再走査を行っても新規未確認領域が0件となった時点。
 
 - **止まる条件**:
   - `04-resources/git-repository/<リポジトリ名>/` 配下に対象コードが存在しない場合。
-  - API のレートリミットが発生した場合（※現在の進捗と再走査用スタックを保存して安全終了）。
   - `pre-commit` フック等で修復不可能なエラーが発生した場合。
+
