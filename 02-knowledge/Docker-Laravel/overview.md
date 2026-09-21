@@ -2,15 +2,9 @@
 created: 2026-09-20
 updated: 2026-09-20
 tags: [Docker-Laravel, spec, code-analysis, overview]
-phase: 2
+phase: 3
 status: active
-unexplored_domains:
-  - "Docker環境定義ファイル群 (`docker/`) -> nginx, php-fpm, mysql, reverb, ngrok"
-  - "GitHub Actions デプロイワークフロー (`.github/workflows/deploy.yml`)"
-  - "環境変数設定テンプレート (`.env.example.doker`)"
-  - "インフラ構築・運用ドキュメント (`ConoHa.md`, `README.md`)"
----
-
+unexplored_domains: []
 # Docker-Laravel リポジトリ概要・機能目録 (Phase 1)
 
 ## 1. 技術スタック・アーキテクチャ判定

@@ -2,10 +2,10 @@
 created: 2026-09-20
 updated: 2026-09-20
 tags: [KaMeToKo, spec, code-analysis, auth]
-phase: 2
+phase: 3
 status: active
-unexplored_domains:
-  - "プロバイダ管理・機能 (`app/Http/Controllers/Provider/`)"
+unexplored_domains: []
+  # - "プロバイダ管理・機能 (`app/Http/Controllers/Provider/`)"
   - "ユーザー個人機能 (`app/Http/Controllers/User/`)"
   - "システム管理機能 (`app/Http/Controllers/System/`)"
   - "DB管理・データベース連携 (`app/Http/Controllers/Db/`)"
