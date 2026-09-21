@@ -5,13 +5,6 @@ tags: [KaMeToKo, spec, code-analysis, auth]
 phase: 3
 status: active
 unexplored_domains: []
-  # - "プロバイダ管理・機能 (`app/Http/Controllers/Provider/`)"
-  - "ユーザー個人機能 (`app/Http/Controllers/User/`)"
-  - "システム管理機能 (`app/Http/Controllers/System/`)"
-  - "DB管理・データベース連携 (`app/Http/Controllers/Db/`)"
-  - "APIエンドポイント機能 (`app/Http/Controllers/Api/`)"
-  - "サービス個別機能（勤怠・会計・予約・ストア） (`app/Http/Controllers/Service/`)"
----
 
 # 認証機能 (Auth) 挙動・処理仕様ナレッジ
 

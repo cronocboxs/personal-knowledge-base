@@ -1,25 +1,18 @@
 ---
 created: 2026-09-20
-updated: 2026-09-20
+updated: 2026-09-21
 tags: [KaMeToKo, spec, code-analysis, overview]
 phase: 3
 status: active
 unexplored_domains: []
-  # - "認証機能 (Auth / Login / Register / Passkey / GoogleAuth) (`app/Http/Controllers/Auth/`)"
-  - "プロバイダ管理・機能 (`app/Http/Controllers/Provider/`)"
-  - "ユーザー個人機能 (`app/Http/Controllers/User/`)"
-  - "システム管理機能 (`app/Http/Controllers/System/`)"
-  - "DB管理・データベース連携 (`app/Http/Controllers/Db/`)"
-  - "APIエンドポイント機能 (`app/Http/Controllers/Api/`)"
-  - "サービス個別機能（勤怠・会計・予約・ストア） (`app/Http/Controllers/Service/`)"
 ---
 
-# KaMeToKo リポジトリ概要・機能目録 (Phase 1)
+# KaMeToKo リポジトリ概要・機能目録 (Phase 3 完了)
 
 ## 1. 技術スタック・アーキテクチャ判定
 - **言語**: PHP 8.4
 - **フレームワーク**: Laravel 12.0
-- **フロントエンド / UI**: Inertia.js (Inertia-Laravel), Vite, Laravel UI, Vue / Blade (推測)
+- **フロントエンド / UI**: Inertia.js (Inertia-Laravel), Vite, Laravel UI, Vue / Blade
 - **主要ライブラリ**:
   - `alexusmai/laravel-file-manager`: ファイルマネージャー
   - `google/apiclient`: Google API連携
@@ -39,22 +32,11 @@ unexplored_domains: []
 - **コンソール・CLI (`routes/console.php`, `artisan`)**: バックグラウンド処理・メンテナンスコマンド。
 - **チャンネル (`routes/channels.php`)**: Reverb等によるリアルタイム通信用ブロードキャストチャンネル。
 
-## 3. 主要モジュール・コントローラー群 (Phase 1 目録)
-1. **認証モジュール (`app/Http/Controllers/Auth/`)**
-   - Login, Register, Forgot/Reset Password, Passkey, GoogleAuth
-2. **プロバイダモジュール (`app/Http/Controllers/Provider/`)**
-   - Dashboard, Room (チャット), Join/Apply, Invite, ChatMessage, Role, Switch, Profile, Attachment
-3. **ユーザーモジュール (`app/Http/Controllers/User/`)**
-   - Profile, EmailChange, Notify, Calendar, Attachment, List
-4. **システムモジュール (`app/Http/Controllers/System/`)**
-   - User, Provider (Service/Apply/Provider), App, Impersonation, Help/Public
-5. **DBモジュール (`app/Http/Controllers/Db/`)**
-   - DbBase, Application, User, ActionLog, Service (Permission/User/Service/Role/Provider)
-6. **APIモジュール (`app/Http/Controllers/Api/`)**
-   - Markdown, Validate, Service (RolePermission, UserRole)
-7. **サービス個別モジュール (`app/Http/Controllers/Service/`)**
-   - Attendance (勤怠管理: Result, Request, Timestamp, Manager)
-   - Accounting (会計・請求: Accounting, Invoice)
-   - Reservation (予約管理: Reservation, Course, Staff, Manage, Public)
-   - Store (ストア管理: Store, Manage)
-   - Contract, Select, Attachment
+## 3. 主要モジュール・コントローラー群 (全解読完了)
+1. **認証モジュール (`app/Http/Controllers/Auth/`)** - 完了
+2. **プロバイダモジュール (`app/Http/Controllers/Provider/`)** - 完了
+3. **ユーザーモジュール (`app/Http/Controllers/User/`)** - 完了
+4. **システム管理モジュール (`app/Http/Controllers/System/`)** - 完了
+5. **DB管理モジュール (`app/Http/Controllers/Db/`)** - 完了
+6. **APIエンドポイントモジュール (`app/Http/Controllers/Api/`)** - 完了
+7. **サービス個別モジュール (`app/Http/Controllers/Service/`)** - 完了 (勤怠、会計、予約、ストア、契約管理等)
