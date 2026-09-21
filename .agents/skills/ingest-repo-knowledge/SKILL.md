@@ -11,11 +11,11 @@ description: 04-resources/git-repository/ 配下のリポジトリコードを�
 
 ## 前提条件（共通ルールの確認）
 
-- 作業開始時に、リポジトリルート直下の `AGENTS.md` および `00-rules/workflow.md` を必ず読み込み、そこに記載された「絶対遵守ルール」「ディレクトリ編集ポリシー」「ナレッジ育成ルール」に従うこと。
+- 作業開始時に、リポジトリルート直下の `AGENTS.md` および `00-rules/workflow.md` を必ず読み込むこと。
 
 ---
 
-## 知識進化（Knowledge Evolution）判定規則
+## 知識進化（ナレッジ育成）判定規則
 
 `02-knowledge/<リポジトリ名>/` 内のノートの Frontmatter (`phase`) を更新する際は、**リポジトリ全体の機能網羅率**を基準に判定すること。
 
