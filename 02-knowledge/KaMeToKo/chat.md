@@ -1,53 +1,59 @@
 ---
 created: 2026-09-21
 updated: 2026-09-21
-tags: [KaMeToKo, chat, room, message, reverb, spec, code-analysis]
-phase: 5
+tags: [KaMeToKo, chat, room, reverb, websocket, spec, code-analysis]
+phase: 4
 status: active
-unexplored_domains: []
+unexplored_domains:
+    - "勤怠管理 (Attendance): `app/Http/Controllers/Service/Attendance/` と 予約管理システム (Reservation)"
 ---
 
-# リアルタイムチャット・メッセージング (`MessageController` / `MessageService` / Reverb連携) 最深部仕様ナレッジ
+# KaMeToKo リアルタイムチャット・ルーム管理ドメイン 最深部仕様ナレッジ
 
 ## 1. 概要
-`app/Http/Controllers/Provider/Room/MessageController.php` および `app/Services/Service/Provider/Message/MessageService.php` は、KaMeToKo におけるリアルタイムチャット（ルーム、メッセージ投稿、スレッド返信、ファイル添付、メンション、ピン留め、Laravel Reverbを用いたWebSocketブロードキャスト通知）の最深部ロジックを担うモジュールです。
+`app/Services/Service/Provider/Message/MessageService.php` および関連コントローラー・イベントは、マルチテナント環境におけるリアルタイムチャットシステムの中核を担います。Laravel Reverb（WebSocket）を用いたメッセージ配信、ルーム作成・更新・メンバー同期、添付ファイルの動的ストレージパス生成、メンション抽出および `UserNotification` による通知連動を完全に統合制御しています。
 
 ## 2. インターフェース・最深部処理トレース (Phase 2 & Phase 4 必須)
 
-### 機能1: メッセージ送信・更新・スレッド処理 (`MessageService::send`)
-#### トリガー1: 「チャットルームにおけるメッセージ新規投稿・スレッド返信または編集」
+### 機能1: チャットメッセージ送受信・スレッド返信・既読管理
+#### トリガー1: 「ストアスタッフまたはユーザーからのチャットメッセージ送信 (`MessageService::send()`)」
 - **最深部までの処理流転（Deep Logic Execution Flow）**:
-  1. **エントリーポイント**: `MessageController::post()` または `update()` からの入力受取。
+  1. **エントリーポイント**: `App\Http\Controllers\Provider\Room\MessageController::store()` などのコントローラー経由。
   2. **サービス・ドメイン層**: 
-     - `MessageService::send()` が呼び出され、まず `trim($body) === '' && empty($attachmentIds)` による入力バリデーション（例外: `InvalidArgumentException`）。
-     - `DB::transaction()` 内で処理を実行。
+     - `MessageService::send()` が呼び出され、`body` または `attachmentIds` の存在を検証 (`InvalidArgumentException`)。
   3. **内部プライベート関数・ヘルパー（最深部ロジック）**:
-     - **書き込みロック & 権限チェック**: `RoomAccessService::writeLock($room->id, $user)` により、テナントコンテキストおよびルームアクセス権を厳密に検証しつつ悲観的ロックを確保。
-     - **新規作成 vs 更新分岐**:
-       - **新規 ($id == null)**: `ServiceProviderMessage::create()` によりメッセージを永続化。親IDがある場合（スレッド返信）、親メッセージの `thread_reply_count` をインクリメントし `last_reply_at` を更新。ルームの `last_message_id` と `last_message_ins` を更新。投稿者を自動既読にする (`$roomUser->update()`)。
-       - **更新 ($id != null)**: 該当メッセージ（自作メッセージに限る）を取得し、`body` を更新。添付ファイル (`$attachmentIds`) の差分比較を行い、不要になったアセットのストレージ紐付け解除（`detach`）および実体削除 (`$attachment->delete()`) を実行。
-     - **添付ファイルパス管理**: `MessageService::makeAttachmentPath($room->provider_id, $room->id, $message->id)` により物理ストレージパスを構造化し、`TagParser` を用いてタグを自動生成。
-     - **メンション抽出・通知**: `MessageService::extractMentionIds()` が `@[ID:名前]` の正規表現パターンから対象ユーザーIDを抽出し、`notifyMentions()` を介して `UserNotification::notify()` を非同期/同期発行。
+     - **書き込みロックと権限チェック (`RoomAccessService::writeLock`)**: ルームへのアクセス権・書き込み権限を排他制御付きで検証。
+     - **新規作成 vs 更新分岐 (`$id` の有無)**:
+       - 新規作成時は `ServiceProviderMessage::create()` を実行。親メッセージ（`parent_id`）が存在する場合はスレッド返信として `parent->increment('thread_reply_count')` および `last_reply_at` を更新。ルームの `last_message_id` および `last_message_ins` を更新。投稿者を自動既読にする (`roomUser->update`)。
+       - 更新時は指定された `$attachmentIds` 以外の添付ファイルをデータベースから切り離し（`detach()`）、物理削除を実行。
+     - **添付ファイルパス生成 (`MessageService::makeAttachmentPath`)**: `provider_{id}/room_{id}/message_{id}` の構造でストレージパスおよびタグを動的生成・更新。
+     - **メンション抽出 (`MessageService::extractMentionIds`)**: `@[ID:名前]` の正規表現パターンから対象ユーザーIDを抽出。
   4. **データ永続化・低層処理**: 
-     - データベーストランザクション内でのモデル保存と関連リレーションの同期 (`syncWithoutDetaching`)。
+     - データベーストランザクション（`DB::transaction`）により、メッセージ、添付ファイルリレーション（`syncWithoutDetaching`）、既読状態の整合性を保証。
   5. **副作用・非同期イベント**: 
-     - `MessageService::broadcastCreatedMessage()` / `broadcastUpdatedMessage()` を通じて、Laravel Reverb (`broadcast(new MessageCreatedEvent($message))`) を発火し、WebSocket経由でクライアントへリアルタイム同期。
+     - メンション対象ユーザーへの `UserNotification::notify()` による通知発行。
 - **出力・応答・状態変化**:
-  - **成功/失敗時の最深部挙動**: 正常時は成功JSONレスポンス (`successToJson`)、アクセス権違反時は `RuntimeException` をキャッチして 403 エラーレスポンス、その他の例外は 500 エラーレスポンス。
+  - **成功時**: 永続化された `ServiceProviderMessage` モデルインスタンスを返却。
 
 ---
 
-### 機能2: メッセージアーカイブ処理 (`ArchiveMessageJob` / `MessageArchiveService`)
-#### トリガー1: 「大量メッセージの定期または手動アーカイブ処理」
+### 機能2: ルーム作成・メンバー同期・ブロードキャスト通知
+#### トリガー1: 「チャットルーム作成またはメンバーの追加・除外」
 - **最深部までの処理流転（Deep Logic Execution Flow）**:
-  1. **エントリーポイント**: `MessageController::archive()` からの `ArchiveMessageJob::dispatch()` 呼び出し。
-  2. **サービス・ドメイン層**: キューワーカーワーカーによって非同期バックグラウンド実行される `ArchiveMessageJob`。
+  1. **エントリーポイント**: `MessageService::create()` / `update()`。
+  2. **サービス・ドメイン層**: 
+     - 指定された `serviceUserIds` をユニーク化・整数化し、`ServiceProviderMessageRoom::create()` または `update()` を実行。
   3. **内部プライベート関数・ヘルパー（最深部ロジック）**:
-     - 期間やID範囲指定（`start_id`, `end_id`, `start_date`, `end_date`）に基づいて、該当メッセージおよび添付ファイルをアーカイブテーブル（`ServiceProviderMessageArchive`, `ServiceMessageAttachmentArchive`）へ一括退避・構造化移管。
-  4. **データ永続化・低層処理**: トランザクションによる安全なデータ移動と元テーブルからの削除。
+     - **メンバー同期 (`syncWithoutDetaching` / `sync`)**: `last_read_message_id => 0` 初期値付きで中間テーブルを同期。
+     - **ブロードキャスト配信 (`broadcastCreatedMessage` / `broadcastUpdateRoom`)**: Laravel Reverb を用いて `RoomCreatedEvent`, `RoomUpdatedEvent`, `RoomRemovedEvent`, `MessageCreatedEvent`, `MemberUpdatedEvent` をイベントブロードキャスト。
+  4. **データ永続化・低層処理**: 
+     - メンバー追加・除外時に自動システムメッセージ（例: 「〇〇さんを追加しました」）を内部的に送信。
+  5. **副作用・非同期イベント**: 
+     - WebSocket経由のリアルタイム画面更新および対象ユーザーへの非同期プッシュ/DB通知（`UserNotification`）。
+- **出力・応答・状態変化**:
+  - **成功時**: `ServiceProviderMessageRoom` モデルを返却。
 
 ## 3. 再走査・深層比較ログ (Phase 5)
 - **最終再走査日**: 2026-09-21
 - **発掘された未確認領域・補全履歴**:
-  - 2026-09-21: `MessageController.php` および `MessageService.php` のスレッド返信、添付ファイルの動的差分削除・紐付け、正規表現メンション抽出（`extractMentionIds`）、および Reverb ブロードキャスト（`MessageCreatedEvent` 等）の最深部処理流転を完全解読・追記。
-  - 2026-09-21: `overview.md` の `unexplored_domains` をすべて消化し、完全網羅状態（Phase 5）に到達。
+  - 2026-09-21: `MessageService.php` のメッセージ送受信トランザクション、添付ファイル動的パス生成（`makeAttachmentPath`）、正規表現メンション抽出（`extractMentionIds`）、および Reverb ブロードキャスト連動処理の最深部仕様を解読・追記。
