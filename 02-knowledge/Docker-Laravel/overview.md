@@ -2,9 +2,13 @@
 created: 2026-09-20
 updated: 2026-09-20
 tags: [Docker-Laravel, spec, code-analysis, overview]
-phase: 3
+phase: 1
 status: active
-unexplored_domains: []
+unexplored_domains: 
+  - `docker/` (各コンテナのDockerfileおよび設定ファイル詳細)
+  - `.github/workflows/deploy.yml` (CI/CDワークフロー詳細)
+  - `ConoHa.md` / `README.md` (運用手順・インフラ構成詳細)
+---
 # Docker-Laravel リポジトリ概要・機能目録 (Phase 1)
 
 ## 1. 技術スタック・アーキテクチャ判定

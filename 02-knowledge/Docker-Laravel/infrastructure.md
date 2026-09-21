@@ -2,9 +2,12 @@
 created: 2026-09-21
 updated: 2026-09-21
 tags: [Docker-Laravel, spec, code-analysis, infrastructure]
-phase: 3
+phase: 1
 status: active
-unexplored_domains: []
+unexplored_domains: 
+  - "Dockerコンテナ定義群（docker-compose.base.yml）から"
+---
+
 # Docker-Laravel インフラ・構成詳細・処理仕様ナレッジ
 
 ## 1. 識別された機能・インターフェース一覧 (Phase 1 完了)
