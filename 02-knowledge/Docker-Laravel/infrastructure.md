@@ -2,7 +2,7 @@
 created: 2026-09-21
 updated: 2026-09-22
 tags: [Docker-Laravel, spec, code-analysis, infrastructure, deep-logic]
-phase: 4
+phase: 5
 status: active
 unexplored_domains: []
 ---
@@ -14,6 +14,7 @@ unexplored_domains: []
 - [x] GitHub Actions デプロイワークフロー (`.github/workflows/deploy.yml`)
 - [x] 環境変数設定テンプレート (`.env.example.doker`)
 - [x] インフラ構築・運用ドキュメント (`ConoHa.md`, `README.md`)
+- [x] Laravel Reverb リアルタイムWebSocket通信インフラ・プロキシ設定 (`docker/reverb-php/reverb.md`)
 
 ## 2. インターフェース・トリガー別詳細トレース (Phase 2 & Phase 4 必須)
 
@@ -58,8 +59,22 @@ unexplored_domains: []
 - **成功/失敗時の最深部挙動**:
   - 失敗時は SSH 接続断または Docker ビルドエラーにより GitHub Actions が停止し、VPS 側の古いコンテナが維持またはクリーンアップされる。
 
+### 機能3: Laravel Reverb WebSocket リアルタイム通信基盤
+#### トリガー: 「ブラウザからの `wss://` 接続および Laravel からのイベントブロードキャスト」
+- **最深部までの処理流転（Deep Logic Execution Flow）**:
+  1. **エントリーポイント**: ブラウザからの `wss://<host>/app/<key>` リクエストが Nginx (`docker/web-nginx/default.conf.template`) で受信される。
+  2. **サービス・ドメイン層**: Nginx のプロキシ設定により、HTTP ヘッダー (`Upgrade`, `Connection`) が書き換えられ、`http://reverb-php:8080/app/` へ転送される。
+  3. **内部プライベート関数・ヘルパー**:
+     - `reverb-php` コンテナ (`docker/reverb-php/Dockerfile`) 内で実行される `php artisan reverb:start --host=0.0.0.0 --port=8080` がリクエストを処理。
+     - 依存する `pcntl`, `sockets`, `redis` PHP 拡張を介して、高パフォーマンスな非同期イベント駆動ループを維持。
+  4. **データ永続化・低層処理**:
+     - Laravel アプリケーション層 (`app-php`) から `BROADCAST_CONNECTION=reverb` を通じて発火されたイベントが、Redis Pub/Sub バックエンドを経由して Reverb サーバーへと同期。
+  5. **副作用・非同期イベント**:
+     - 接続されたクライアント群へのリアルタイムメッセージプッシュと、接続維持のための Ping/Pong 制御。
+
 ## 3. 再走査・深層比較ログ (Phase 5)
 - **最終再走査日**: 2026-09-22
 - **発掘された未確認領域・補全履歴**:
   - 2026-09-21: Phase 1〜3 によるインフラ構成・デプロイフローの全体目録化および一巡トレース完了。
   - 2026-09-22: Phase 4 に基づく `docker/app-php/Dockerfile` のパッケージ群・拡張モジュール、`default.conf.template` の Nginx プロキシ・FastCGI パラメータの最深部ロジック追跡・加筆を実施。
+  - 2026-09-22: Phase 5 の再走査・差分発掘により `docker/reverb-php/reverb.md` に記載されている Laravel Reverb の WebSocket プロキシ構成・Redis Pub/Sub 連携・Dockerfile 依存関係（`pcntl`, `sockets`, `redis`）の深層ロジックを発掘し、仕様ナレッジとして完全統合。新たな未確認領域は0件となり、完全網羅を達成。
