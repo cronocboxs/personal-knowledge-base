@@ -5,7 +5,6 @@ tags: [KaMeToKo, datasource, spec, code-analysis]
 phase: 4
 status: active
 unexplored_domains:
-    - "認証・認可基盤 `app/Http/Middleware/CheckPermission.php`, `CheckServicePermission.php` の最深部権限チェックロジック"
     - "予約・店舗管理ドメイン `app/Http/Controllers/Service/Reservation/` と `ManageReservationService.php` のトランザクション・通知処理"
     - "チャット・リアルタイム通信ドメイン `app/Http/Controllers/Provider/Room/` と `MessageService.php`, Reverb連携イベント"
 ---
@@ -31,7 +30,7 @@ unexplored_domains:
      - 取得したチャンクをトランザクション内でDBにバルクインサートまたは更新（Upsert）。
   5. **副作用・非同期イベント**: 
      - インポート失敗時の例外スローとログ出力 (`SystemLogServiceProvider`).
-- **出力・応答・状態変化**:
+- **Output / 応答・状態変化**:
   - **成功/失敗時の最深部挙動**: APIクォータ制限や不正なスプレッドシート構造による `Google_Service_Exception` 発生時はキャッチされ、上位サービスへログ付き例外を伝播。
 
 ## 3. 再走査・深層比較ログ (Phase 5)
