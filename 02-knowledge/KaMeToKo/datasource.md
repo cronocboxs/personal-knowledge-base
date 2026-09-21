@@ -7,6 +7,7 @@ status: active
 unexplored_domains:
     - "予約・店舗管理ドメイン `app/Http/Controllers/Service/Reservation/` と `ManageReservationService.php` のトランザクション・通知処理"
     - "チャット・リアルタイム通信ドメイン `app/Http/Controllers/Provider/Room/` と `MessageService.php`, Reverb連携イベント"
+    - "勤怠管理 (Attendance): `app/Http/Controllers/Service/Attendance/` と 予約管理システム (Reservation), Reverb連携イベント"
 ---
 
 # KaMeToKo データソース統合サービス (DataSource) & 認証・認可基盤 最深部仕様ナレッジ
@@ -36,13 +37,14 @@ unexplored_domains:
   - **成功/失敗時の最深部挙動**: APIクォータ制限や不正なスプレッドシート構造による `Google_Service_Exception` 発生時はキャッチされ、上位サービスへログ付き例外を伝播。
 
 ### 機能2: 認証・認可基盤ミドルウェア (`app/Http/Middleware/CheckPermission.php` & `CheckServicePermission.php`)
-#### トリガー1: 「標準権限およびマルチテナントサービス権限チェック(`can` / `canAnyService`)」
+#### トリガー1: 「標準権限およびマルチテナントサービス権限チェック (`can` / `canAnyService`)」
 - **最深部までの処理流転（Deep Logic Execution Flow）**:
   1. **エントリーポイント**: HTTP リクエスト到達時の Laravel ミドルウェアスタック (`CheckPermission`, `CheckServicePermission`).
   2. **サービス・ドメイン層**: 
      - `CheckPermission`: `auth()->user()->can($permission)` によるシステム共通権限の評価。
      - `CheckServicePermission`: セッションベースのテナント真実である `currentServiceUser()` を取得し、`UserTraitServicePermission::canAnyService()` を介した業務権限エンジンの呼び出し。
   3. **内部プライベート関数・ヘルパー**: 
+     - `UserTraitServicePermission`（`App\Models\User\Trait\service\UserTraitServicePermission`）における `currentServiceUser()` のセッション解決および `canService()` / `canAnyService()` / `canAllService()` / `requireServicePermission()` の最深部評価ロジック。
      - 権限不許可時には `TraitLog::actlog()` を発動。リクエスト情報と不許可理由（`permission denied` / `service permission denied`）を監査ログストレージにセキュリティインシデントとして永続化。
   4. **データ永続化・低層処理**: セキュリティ監査ログへの書き込みおよび `abort(403, '権限がありません')` / `ServicePermissionDeniedException` の送出。
   5. **副作用・非同期イベント**: 不正アクセスの即時遮断と管理コンソール向け監査証跡の保存。

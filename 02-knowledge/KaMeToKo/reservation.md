@@ -6,6 +6,7 @@ phase: 4
 status: active
 unexplored_domains:
     - "チャット・リアルタイム通信ドメイン `app/Http/Controllers/Provider/Room/` と `MessageService.php`, Reverb連携イベント"
+    - "勤怠管理 (Attendance)**: `app/Http/Controllers/Service/Attendance/` と 予約管理システム (Reservation),Reverb連携イベント"
 ---
 
 # KaMeToKo 予約・店舗管理ドメイン 最深部仕様ナレッジ

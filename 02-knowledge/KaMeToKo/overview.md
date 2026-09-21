@@ -6,6 +6,7 @@ phase: 4
 status: active
 unexplored_domains:
     - "チャット・リアルタイム通信ドメイン `app/Http/Controllers/Provider/Room/` と `MessageService.php`, Reverb連携イベント"
+    - "勤怠管理 (Attendance)**: `app/Http/Controllers/Service/Attendance/` と 予約管理システム (Reservation),Reverb連携イベント"
 ---
 
 # KaMeToKo 挙動・最深部仕様ナレッジ (Overview)
@@ -17,7 +18,7 @@ KaMeToKo は Laravel製の大規模マルチテナント型サービス・シス
 - [x] **プロバイダー/テナント管理 (Provider)**: `app/Http/Controllers/Provider/`, `app/Models/Service/Provider/`
 - [x] **予約管理システム (Reservation)**: `app/Http/Controllers/Service/Reservation/`, `app/Services/Service/Reservation/ManageReservationService.php`
 - [x] **リアルタイムチャット (Chat / Room)**: `app/Http/Controllers/Provider/Room/`, `app/Events/Provider/Room/`, `app/Jobs/ArchiveMessageJob.php`
-- [x] **勤怠管理 (Attendance)**: `app/Http/Controllers/Service/Attendance/`
+- [ ] **勤怠管理 (Attendance)**: `app/Http/Controllers/Service/Attendance/`
 - [x] **データソースインポート機能 (DataSource)**: `app/Services/DataSource/` (Google Sheets, Excel, CSV, Json)
 - [x] **システム・管理コンソール (System)**: `app/Http/Controllers/System/`
 
