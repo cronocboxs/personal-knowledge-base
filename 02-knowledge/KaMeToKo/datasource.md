@@ -5,7 +5,6 @@ tags: [KaMeToKo, datasource, spec, code-analysis]
 phase: 4
 status: active
 unexplored_domains:
-    - "チャット・リアルタイム通信ドメイン `app/Http/Controllers/Provider/Room/` と `MessageService.php`, Reverb連携イベント"
     - "勤怠管理 (Attendance): `app/Http/Controllers/Service/Attendance/` と 予約管理システム (Reservation), Reverb連携イベント"
 ---
 
@@ -50,8 +49,28 @@ unexplored_domains:
 - **Output / 応答・状態変化**:
   - **成功/失敗時の最深部挙動**: 許可時は `$next($request)` でコントローラーへ処理継続、拒否時は 403 JSON レスポンス＋HTML例外ページの返却。
 
+### 機能3: チャット・リアルタイム通信ドメイン (`MessageService.php` & `ChatMessageController.php`)
+#### トリガー1: 「ルーム内メッセージ送信・スレッド返信およびReverb連携イベント発火」
+- **最深部までの処理流転（Deep Logic Execution Flow）**:
+  1. **エントリーポイント**: `App\Http\Controllers\Provider\Chat\MessageController::send()` または `MessageService::send()` の呼び出し。
+  2. **サービス・ドメイン層**: 
+     - リクエストのバリデーション（`message: required|string|max:2000`）。
+     - `RoomAccessService::writeLock($room->id, $user)` を呼び出し、ルームに対する書き込みロックとメンバー権限の厳格な検証。
+  3. **内部プライベート関数・ヘルパー**:
+     - **新規作成・更新分岐**: `$id` の有無により `ServiceProviderMessage::create()` または既存メッセージの `update()` を実行。親メッセージ（`$parent`）が存在する場合は `thread_reply_count` のインクリメントと `last_reply_at` の更新。
+     - **添付ファイル処理**: `$attachmentIds` が指定されている場合、`ServiceProviderAttachment::whereIn()` で取得し、`makeAttachmentPath()` を用いてストレージパスとタグを再構築。`syncWithoutDetaching()` で中間テーブルに紐付け。
+     - **メンション抽出**: `extractMentionIds()` により `@[ID:名前]` の形式から正規表現（`/@\[(\d+):.+?\]/`）でメンション対象ユーザーIDを抽出。
+  4. **データ永続化・低層処理**: 
+     - すべての処理は `DB::transaction()` 内でアトミックに実行され、ルームの `last_message_id` や `last_message_ins`、送信者の `last_read_message_id` が同時に更新される。
+  5. **副作用・非同期イベント**: 
+     - **Laravel Reverb (WebSocket) ブロードキャスト**: `broadcast(new ChatMessageSent($msg))->toOthers()` または `MessageService::broadcastCreatedMessage()` 経由で `MessageCreatedEvent`、`RoomUpdatedEvent` を発火し、各クライアントのリアルタイムUIを更新。
+     - **通知送信**: メンションされたユーザーに対して `UserNotification::notify()` を実行し、データベース・通知キューへレコードを永続化。
+- **Output / 応答・状態変化**:
+  - **成功/失敗時の最深部挙動**: 本文も添付ファイルも空の場合は `InvalidArgumentException` をスロー。トランザクションエラー時はロールバックし例外を伝播。
+
 ## 3. 再走査・深層比較ログ (Phase 5)
 - **最終再走査日**: 2026-09-21
 - **発掘された未確認領域・補全履歴**:
   - 2026-09-21: `TabularDataSourceInterface` および `GoogleSheetsSource.php` の最深部APIコール（`spreadsheets_values->get`）の流転を解読・追記。
   - 2026-09-21: `CheckPermission.php`, `CheckServicePermission.php` および `UserTraitServicePermission.php` の最深部権限チェックロジック（`currentServiceUser()` 連携と `TraitLog::actlog()` による監査証跡永続化）を発掘・追記。
+  - 2026-09-21: `MessageService.php` および `MessageController.php` の最深部メッセージ送信・スレッド返信・添付ファイル紐付け・Reverbブロードキャストイベント（`MessageCreatedEvent`, `RoomUpdatedEvent`）の流転を発掘・追記。
