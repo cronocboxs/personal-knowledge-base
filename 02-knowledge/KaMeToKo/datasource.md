@@ -78,3 +78,19 @@ unexplored_domains: []
   - 2026-09-21: `CheckPermission.php`, `CheckServicePermission.php` および `UserTraitServicePermission.php` の最深部権限チェックロジック（`currentServiceUser()` 連携と `TraitLog::actlog()` による監査証跡永続化）を発掘・追記。
   - 2026-09-21: `MessageService.php` および `MessageController.php` の最深部メッセージ送信・スレッド返信・添付ファイル紐付け・Reverbブロードキャストイベント（`MessageCreatedEvent`, `RoomUpdatedEvent`）の流転を発掘・追記。
   - 2026-09-22: 全 `unexplored_domains` を完全に解消し、データソースおよび関連基盤の最深部ロジック検証を完了。
+
+### 機能4: 認証・認可基盤ミドルウェア最深部 (`CheckPermission.php` & `CheckServicePermission.php`)
+#### トリガー1: 「保護されたルート・サービスへのHTTPリクエスト時の権限検証」
+- **最深部までの処理流転（Deep Logic Execution Flow）**:
+  1. **エントリーポイント**: ルート定義で指定された `middleware('permission:xxx')` または `middleware('service.permission:xxx')` から `CheckPermission::handle()` / `CheckServicePermission::handle()` が呼び出される。
+  2. **サービス・ドメイン層**: 
+     - `auth()->check()` および `auth()->user()->can($permission)`（または `canAnyService($permissions)`）により権限マトリクスを評価。
+     - `CheckServicePermission` では、`auth()->user()` にインクルードされたトレイト経由でセッションコンテキスト上の現在のサービスプロバイダー（`currentServiceUser()`）を特定し、その配下における業務権限（`can()`）を厳格に評価。
+  3. **内部プライベート関数・ヘルパー**:
+     - **TraitLog::actlog()**: 権限不備（拒否時）のセキュリティ監査トレース。リクエスト情報、403ステータス、エラーメッセージ（`permission denied` / `service permission denied`）および該当パーミッション名をセキュリティログとして記録。
+  4. **データ永続化・低層処理**: 
+     - セキュリティ監査ログ（`TraitLog::actlog()`）による不正アクセスの永続化記録。
+  5. **副作用・非同期イベント**: 
+     - 権限不足時は `abort(403, '権限がありません')` / `abort(403, 'サービス権限がありません')` をスローし、HTTP 403 レスポンスを返却。
+- **Output / 応答・状態変化**:
+  - **成功/失敗時の最深部挙動**: 許可時は `$next($request)` によりコントローラーへ処理継続。拒否時は `TraitLog::actlog(..., true)` で強制的にセキュリティフラグ付きの監査ログを残した上で例外を発生させる。
