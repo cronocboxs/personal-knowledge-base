@@ -4,14 +4,7 @@ updated: 2026-09-21
 tags: [KaMeToKo, spec, code-analysis]
 phase: 4
 status: active
-unexplored_domains: 
-  - **認証・認可 (Auth / Passkey / GoogleAuth / Middleware CheckPermission)**: `app/Http/Controllers/Auth/`, `app/Http/Middleware/CheckPermission.php`, `app/Http/Middleware/CheckServicePermission.php`
-  - **プロバイダー/テナント管理 (Provider)**: `app/Http/Controllers/Provider/`, `app/Models/Service/Provider/`
-  - **予約管理システム (Reservation)**: `app/Http/Controllers/Service/Reservation/`, `app/Services/Service/Reservation/ManageReservationService.php`
-  - **リアルタイムチャット (Chat / Room)**: `app/Http/Controllers/Provider/Room/`, `app/Events/Provider/Room/`, `app/Jobs/ArchiveMessageJob.php`
-  - **勤怠管理 (Attendance)**: `app/Http/Controllers/Service/Attendance/`, `TimestampController.php`
-  - **データソースインポート機能 (DataSource)**: `app/Services/DataSource/` (Google Sheets, Excel, CSV, Json)
-  - **システム・管理コンソール (System)**: `app/Http/Controllers/System/`
+unexplored_domains: []
 ---
 
 # KaMeToKo 挙動・最深部仕様ナレッジ (Overview)
@@ -19,13 +12,13 @@ unexplored_domains:
 ## 1. 識別された機能・インターフェース一覧 (Phase 1)
 KaMeToKo は Laravel製の大規模マルチテナント型サービス・システムプラットフォーム（予約、チャット、勤怠管理、データソースインポート等を含む）です。主なモジュール群は以下の通りです：
 
-- [ ] **認証・認可 (Auth / Passkey / GoogleAuth / Middleware CheckPermission)**: `app/Http/Controllers/Auth/`, `app/Http/Middleware/CheckPermission.php`, `app/Http/Middleware/CheckServicePermission.php`
-- [ ] **プロバイダー/テナント管理 (Provider)**: `app/Http/Controllers/Provider/`, `app/Models/Service/Provider/`
-- [ ] **予約管理システム (Reservation)**: `app/Http/Controllers/Service/Reservation/`, `app/Services/Service/Reservation/ManageReservationService.php`
-- [ ] **リアルタイムチャット (Chat / Room)**: `app/Http/Controllers/Provider/Room/`, `app/Events/Provider/Room/`, `app/Jobs/ArchiveMessageJob.php`
-- [ ] **勤怠管理 (Attendance)**: `app/Http/Controllers/Service/Attendance/`, `TimestampController.php`
-- [ ] **データソースインポート機能 (DataSource)**: `app/Services/DataSource/` (Google Sheets, Excel, CSV, Json)
-- [ ] **システム・管理コンソール (System)**: `app/Http/Controllers/System/`
+- [x] **認証・認可 (Auth / Passkey / GoogleAuth / Middleware CheckPermission)**: `app/Http/Controllers/Auth/`, `app/Http/Middleware/CheckPermission.php`, `app/Http/Middleware/CheckServicePermission.php`
+- [x] **プロバイダー/テナント管理 (Provider)**: `app/Http/Controllers/Provider/`, `app/Models/Service/Provider/`
+- [x] **予約管理システム (Reservation)**: `app/Http/Controllers/Service/Reservation/`, `app/Services/Service/Reservation/ManageReservationService.php`
+- [x] **リアルタイムチャット (Chat / Room)**: `app/Http/Controllers/Provider/Room/`, `app/Events/Provider/Room/`, `app/Jobs/ArchiveMessageJob.php`
+- [x] **勤怠管理 (Attendance)**: `app/Http/Controllers/Service/Attendance/`, `TimestampController.php`
+- [x] **データソースインポート機能 (DataSource)**: `app/Services/DataSource/` (Google Sheets, Excel, CSV, Json)
+- [x] **システム・管理コンソール (System)**: `app/Http/Controllers/System/`
 
 ## 2. インターフェース・最深部処理トレース (Phase 2 & Phase 4 必須)
 
