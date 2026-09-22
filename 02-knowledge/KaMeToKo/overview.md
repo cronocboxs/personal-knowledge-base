@@ -1,6 +1,6 @@
 ---
 created: 2026-09-21
-updated: 2026-09-21
+updated: 2026-09-22
 tags: [KaMeToKo, spec, code-analysis]
 phase: 4
 status: active
@@ -8,7 +8,6 @@ unexplored_domains:
  - Controllerから全てのviewを辿る
  - viewコンポーネントの理解
  - vueコンポーネントの理解
- - viteconfigの理解
  - 組み込みcomposerと使用箇所の抜き出し、使用している場所の仕様
  - 組み込みpackageと使用箇所の抜き出し、使用している場所の仕様
 ---
@@ -55,6 +54,20 @@ KaMeToKo は Laravel製の大規模マルチテナント型サービス・シス
   1. **エントリーポイント**: `TimestampController::punch()`。
   2. **サービス・ドメイン層**: 勤務者特定と現在時刻/日付判定。
   3. **内部プライベート関数・ヘルパー**: 二重出勤ガード（`ServiceAttendanceTime::lastAttendance()`）、シフト予定（`ServiceAttendanceRequest`）の自動紐付け、退勤時の今日・昨日限定ピンポイント行特定ロジック。
+
+### 機能5: Viteビルド構成とフロントエンドアセット管理 (`vite.config.js`)
+#### トリガー1: 「`npm run build` または開発サーバー(`npm run dev`)起動時のアセットバンドル・最適化処理」
+- **最深部までの処理流転（Deep Logic Execution Flow）**:
+  1. **エントリーポイント**: `vite.config.js` の `defineConfig`。
+  2. **プラグイン層**:
+     - `laravel` プラグイン: `resources/css/app.css`, `resources/sass/app.scss` および `resources/js/vue/**/*.js` 配下のファイルを再帰的に glob 取得し、エントリポイント（`vueEntries`）として動的登録。
+     - `vue` プラグイン: Vue 3 のランタイムコンパイラ（`vue/dist/vue.esm-bundler.js`）のエイリアス設定およびテンプレート最適化。
+  3. **Rollupビルド・最適化オプション**:
+     - `build.rollupOptions.output.manualChunks`: `vue`, `axios`, `bootstrap` を共通の `vendor` チャンクに強制分離しキャッシュ効率を向上。
+     - `build.rollupOptions.maxParallelFileOps: 6` によるファイル操作の同時並列数制限（メモリ消費保護）。
+  4. **開発サーバー・HMR (Hot Module Replacement)**:
+     - `server.https`: `privkey.pem` と `fullchain.pem` のSSL証明書を `fs.readFileSync` で同期ロードしてセキュアなローカル開発環境（WSS）を提供。
+     - `server.watch.usePolling`: Dockerなどのファイル監視環境下での確実な変更検知。
 
 ## 3. 再走査・深層比較ログ (Phase 5)
 - **最終再走査日**: 2026-09-21
