@@ -4,7 +4,14 @@ updated: 2026-09-21
 tags: [KaMeToKo, spec, code-analysis]
 phase: 4
 status: active
-unexplored_domains: []
+unexplored_domains: 
+ - routeから各サービスへのURLを辿る
+ - Controllerから全てのviewを辿る
+ - viewコンポーネントの理解
+ - vueコンポーネントの理解
+ - viteconfigの理解
+ - 組み込みcomposerと使用箇所の抜き出し、使用している場所の仕様
+ - 組み込みpackageと使用箇所の抜き出し、使用している場所の仕様
 ---
 
 # KaMeToKo 挙動・最深部仕様ナレッジ (Overview)
