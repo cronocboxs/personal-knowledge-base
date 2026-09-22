@@ -1,0 +1,6 @@
+- [x] AGENTS.md および 00-rules/workflow.md の確認
+- [ ] Docker-Laravel リポジトリの未解析領域（`.github/workflows/deploy.yml` の CI/CDワークフロー詳細）の最深部解析とナレッジ蓄積
+  - [ ] `.github/workflows/deploy.yml` のトリガー、ステップ、SSHデプロイ、環境変数インジェクションの深層トレース
+  - [ ] `02-knowledge/Docker-Laravel/infrastructure.md` または専用ファイルへの詳細追記
+  - [ ] `overview.md` の `unexplored_domains` 更新
+- [ ] git commit の実施
