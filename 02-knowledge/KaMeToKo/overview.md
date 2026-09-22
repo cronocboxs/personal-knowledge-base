@@ -5,7 +5,6 @@ tags: [KaMeToKo, spec, code-analysis]
 phase: 4
 status: active
 unexplored_domains: 
- - routeから各サービスへのURLを辿る
  - Controllerから全てのviewを辿る
  - viewコンポーネントの理解
  - vueコンポーネントの理解
