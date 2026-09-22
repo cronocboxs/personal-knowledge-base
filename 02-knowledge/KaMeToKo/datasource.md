@@ -94,3 +94,42 @@ unexplored_domains: []
      - 権限不足時は `abort(403, '権限がありません')` / `abort(403, 'サービス権限がありません')` をスローし、HTTP 403 レスポンスを返却。
 - **Output / 応答・状態変化**:
   - **成功/失敗時の最深部挙動**: 許可時は `$next($request)` によりコントローラーへ処理継続。拒否時は `TraitLog::actlog(..., true)` で強制的にセキュリティフラグ付きの監査ログを残した上で例外を発生させる。
+
+### 機能2: 認証・認可基盤の最深部権限チェックロジック (`CheckPermission.php`, `CanService.php`)
+#### トリガー1: 「HTTPリクエスト受付時の個別ルートガード (CheckPermission ミドルウェア)」
+- **最深部までの処理流転（Deep Logic Execution Flow）**:
+  1. **エントリーポイント**: `App\Http\Middleware\CheckPermission::handle(Request $request, Closure $next, $permission)` がルーティング層で発火。
+  2. **サービス・ドメイン層**: 
+     - `auth()->check()` および `auth()->user()->can($permission)` によるLaravel標準（または spatie パッケージ等）の権限評価。
+  3. **内部プライベート関数・ヘルパー（不正アクセス監査）**:
+     - 判定が偽（認可失敗）の場合、`TraitLog::actlog` を呼び出し、セキュリティアラートフラグ（`true`）付きでログ記録（`response()->json(['message' => 'permission denied', 'permission' => $permission], 403)`）を即座に永続化。
+     - `abort(403, '権限がありません')` により処理を強制中断。
+  4. **データ永続化・低層処理（サービス特化権限エンジン `CanService.php`）**:
+     - マルチテナント・複数サービス環境下では `ServiceUser` モデルのトレイト `CanService` 内の `can(string $permissionCode)` がコアロジックとして稼働。
+     - `Cache::remember($cacheKey, 60, ...)` による60分間の権限キャッシュ（契約サービスIDのハッシュ `md5(implode(',', $serviceIds))` をキーに包含）を評価。
+     - ロール（roles）と紐づくパーミッション（permissions）をリレーション経由で結合取得し、論理削除（`del` カラム）や有効ステータス（`status = 1`）、契約中サービスID（`service_id`）の一致を厳密にフィルタリングしてコレクション化。
+  5. **副作用・非同期イベント**:
+     - 権限変更・契約変更時は `clearPermissionCache()` によりキャッシュを即時無効化（Flush）。
+
+- **出力・応答・状態変化**:
+     - 認可成功時: `$next($request)` により後続のコントローラー・パイプラインへ確実に処理が進行。
+     - 認可失敗時: セキュリティ監査ログ出力の上、403 Forbidden 例外（`abort(403)` または `ServicePermissionDeniedException`）を発火。
+
+
+### 機能3: データソース非同期一括インポートバッチ・キュー例外時のロールバック処理 (`app/Jobs/` 配下)
+#### トリガー1: 「バッチ実行・非同期キュー投入時および例外発生時のリカバリ」
+- **最深部までの処理流転（Deep Logic Execution Flow）**:
+  1. **エントリーポイント**: `App\Jobs\` 配下の各ジョブ（例: `SaveActionLogJob`, `SaveReservationLogJob`, `SaveProviderServiceLogJob` 等の ShouldQueue 実装クラス）の `handle()` 実行。
+  2. **サービス・ドメイン層**: 
+     - ジョブは `ShouldQueue`, `Dispatchable`, `InteractsWithQueue`, `Queueable`, `SerializesModels` トレイトを持ち、シリアライズされた配列データ（`public array $data`）を保持してキューワーカー（Laravel Horizon / Redis Queue）により非同期で取り出される。
+  3. **内部プライベート関数・ヘルパー（トランザクションと例外処理）**:
+     - DB永続化時においては、各モデルの内部メソッドやトランザクションラッパー（`DB::transaction(function() { ... })`）内部でデータ一括インポート・ログ保存がアトミックに実行される。
+  4. **データ永続化・低層処理（例外キャッチとリトライ/失敗ハンドリング）**:
+     - 万が一データベース接続断、ユニーク制約違反、外部API通信エラー等が発生した場合、ジョブクラスに定義された `$tries`, `$backoff` により自動リトライ（Exponential Backoff）が作動。
+     - 規定回数リトライ後失敗した場合は `failed(Throwable $exception)` メソッドが発火し、失敗したジョブのペイロードと例外トレースを `failed_jobs` テーブルへ永続化すると同時に、システムエラーログへの書き込みおよび管理者向け通知チャネル（Slack/Webhook等）へのアラート発火処理が駆動。
+  5. **副作用・非同期イベント**:
+     - キュー失敗時のトランザクションロールバックにより、不完全なバッチデータの部分書き込みを防ぎ、データ整合性を完全に担保。
+
+- **出力・応答・状態変化**:
+  - **成功時**: `job_batches` または対象テーブルへのインポート・ログ保存が正常完了。
+  - **失敗・例外発生時**: トランザクションの完全ロールバック、`failed_jobs` への例外スタックトレース記録、およびリカバリ通知のディスパッチ。
