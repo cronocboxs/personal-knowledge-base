@@ -30,11 +30,16 @@ description: 04-resources/git-repository/ 配下のリポジトリコードを�
 ## 仕事
 
 - **実行手順**:
+  0. **グラフ解析データ（インデックス）の事前ロード**:
+     - ファイル探索に入る前に、`04-resources/git-repository/<リポジトリ名>/graph/<ブランチ>/` 内の生成物をロードする。
+       - `code-graph.json` または `code-graph-report.md`: クラス・関数・依存関係ツリーの全体像を把握。
+       - `doc-graph.json` または `doc-graph-report.md`: ドキュメント間の相関を把握。
+     - **効果**: 全ファイルを個別に開いて探す無駄を省き、グラフ上の呼び出し関係（エッジ）を元に目的の処理・深層関数が配置されているファイルを直接狙い撃ちして閲覧（`read`/`view`）する。
   1. **全件コード走査 & ナレッジ比較（継続的発掘）**:
-     - 対象リポジトリの全コードを走査し、既存の `02-knowledge/` に蓄積されている内容と比較する。
+     - 対象リポジトリの全コードおよび `code-graph.json` を走査し、既存の `02-knowledge/` に蓄積されている内容と比較する。
      - **「まだ本文に詳しく書かれていないプライベート関数、コールバック、DBクエリ生成、エラー分岐、ライブラリ内部処理」**を発掘し、すべて Frontmatter の `unexplored_domains` に追加する。
   2. **最深部までのトリガー別処理追跡（Phase 2 & Phase 4）**:
-     - `unexplored_domains` から対象を選択し、ソースコードを直接閲覧（`read`/`view`）する。
+     - `unexplored_domains` から対象を選択し、`code-graph.json` の依存関係を辿りながら該当ソースコードを直接閲覧（`read`/`view`）する。
      - 単なる「APIを呼んでDBに保存する」といった表面的な追跡で終わらせず、**「その内部で呼ばれている関数 A ➔ 関数の内部で実行されるプライベート処理 B ➔ 発火するイベント C ➔ 処理されるクエリ D」**のように奥へ奥へ遡って追跡し、本文に記述する。
      - 追跡・記述が完了したドメインのみ `unexplored_domains` から除外する。
   3. **自動ループレジューム判定とコミット**:
@@ -84,6 +89,7 @@ description: 04-resources/git-repository/ 配下のリポジトリコードを�
   - **最終再走査日**: YYYY-MM-DD
   - **発掘された未確認領域・補全履歴**:
     - YYYY-MM-DD: `Helper::calculate()` 内のエッジケース分岐を発掘・追記。
+  ```
 
 - **やらないこと**:
   - コントローラーや公開APIの表面的な呼出関係だけで「解析完了」と判断してストップすること。
@@ -96,6 +102,7 @@ description: 04-resources/git-repository/ 配下のリポジトリコードを�
 
 - **入力**:
   - `04-resources/git-repository/<リポジトリ名>/clone/<ブランチ>/` 配下のソースコード全域
+  - `04-resources/git-repository/<リポジトリ名>/graph/<ブランチ>/code-graph.json` (解析インデックス)
 
 - **出力先**:
   - `02-knowledge/<リポジトリ名>/` 配下の Markdown ファイル群
@@ -107,4 +114,3 @@ description: 04-resources/git-repository/ 配下のリポジトリコードを�
 - **止まる条件**:
   - `04-resources/git-repository/<リポジトリ名>/` 配下に対象コードが存在しない場合。
   - `pre-commit` フック等で修復不可能なエラーが発生した場合。
-
