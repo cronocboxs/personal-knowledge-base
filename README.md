@@ -41,3 +41,11 @@ https://code.claude.com/docs/ja/overview#terminal
 ```bash
 curl -fsSL https://github.com/aaif-goose/goose/releases/download/stable/download_cli.sh | CONFIGURE=false bash
 ```
+
+## graphify
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source ~/.bashrc
+uv tool install graphifyy
+```
