@@ -79,5 +79,6 @@ Temporary Items
 04-resources/git-repository/*
 # 実行ログ・API消費集計ログ
 04-resources/logs/
+tmp/*
 !*/README.md
 !*/.gitkeep
