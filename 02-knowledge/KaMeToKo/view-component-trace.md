@@ -4,8 +4,7 @@ updated: 2026-09-24
 tags: [KaMeToKo, spec, code-analysis, view-component, vue]
 phase: 4
 status: active
-unexplored_domains:
-  - "Vueコンポーネント詳細実装およびAPI通信のエンドポイント連動"
+unexplored_domains: []
 ---
 
 # KaMeToKo ビュー・Vueコンポーネント詳細仕様・最深部ロジックトレース

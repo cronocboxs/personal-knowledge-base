@@ -4,10 +4,7 @@ updated: 2026-09-21
 tags: [KaMeToKo, auth, middleware, permission, spec, code-analysis]
 phase: 4
 status: active
-unexplored_domains:
-    - "予約・店舗管理ドメイン `app/Http/Controllers/Service/Reservation/` と `ManageReservationService.php` のトランザクション・通知処理"
-    - "チャット・リアルタイム通信ドメイン `app/Http/Controllers/Provider/Room/` と `MessageService.php`, Reverb連携イベント"
-    - "勤怠管理 (Attendance)**: `app/Http/Controllers/Service/Attendance/` と 予約管理システム (Reservation),Reverb連携イベント"
+unexplored_domains: []
 ---
 
 # 認証・認可基盤 (`CheckPermission` / `CheckServicePermission`) 最深部仕様ナレッジ

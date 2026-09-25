@@ -4,8 +4,7 @@ updated: 2026-09-21
 tags: [KaMeToKo, chat, room, reverb, websocket, spec, code-analysis]
 phase: 4
 status: active
-unexplored_domains:
-    - "勤怠管理 (Attendance): `app/Http/Controllers/Service/Attendance/` と 予約管理システム (Reservation)"
+unexplored_domains: []
 ---
 
 # KaMeToKo リアルタイムチャット・ルーム管理ドメイン 最深部仕様ナレッジ
