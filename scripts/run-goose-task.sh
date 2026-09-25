@@ -65,13 +65,17 @@ set -e
 API_ERROR_DETECTED=$(grep -i -c -E "Rate limit exceeded|Quota exceeded|429|resourceexhausted|status:\s*(429|500|503)" "${TMP_RUN_LOG}" || true)
 
 # ----------------------------------------------------
-# 🔄 レートリミット時の 5分間ウェイト＆再試行処理
+# 🔄 レートリミット時の 5分間ウェイト＆再試行ループ (最大5回)
 # ----------------------------------------------------
-if [ ${API_ERROR_DETECTED} -gt 0 ]; then
-  echo "⚠️ APIレート制限（429等）を検知しました。5分間（300秒）待機してタスクを再実行します..."
+RETRY_COUNT=0
+MAX_RETRIES=5
+
+while [ ${API_ERROR_DETECTED} -gt 0 ] && [ ${RETRY_COUNT} -lt ${MAX_RETRIES} ]; do
+  RETRY_COUNT=$((RETRY_COUNT + 1))
+  echo "⚠️ APIレート制限（429等）を検知しました。5分間（300秒）待機して再実行します... (リトライ ${RETRY_COUNT}/${MAX_RETRIES})"
   sleep 300
 
-  echo "🔄 5分経過: タスクを再実行します..."
+  echo "🔄 5分経過: タスクを再実行します (試行 ${RETRY_COUNT} 回目)..."
   set +e
   run_goose
   GOOSE_EXIT_CODE=${PIPESTATUS[0]}
@@ -79,7 +83,7 @@ if [ ${API_ERROR_DETECTED} -gt 0 ]; then
 
   # 再試行後のログで再判定
   API_ERROR_DETECTED=$(grep -i -c -E "Rate limit exceeded|Quota exceeded|429|resourceexhausted|status:\s*(429|500|503)" "${TMP_RUN_LOG}" || true)
-fi
+done
 
 # ----------------------------------------------------
 # 🔍 検知＆判定機能
