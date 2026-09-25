@@ -32,13 +32,13 @@ AIエージェントは `ls` コマンドを使用せず、本レポートおよ
 ### 📁 `02-knowledge/subsidies/` (件数: **54**)
 - 階層インデックス: `02-knowledge/subsidies/index.json`
 
-### 📁 `02-knowledge/Docker-Laravel/` (件数: **0**)
+### 📁 `02-knowledge/Docker-Laravel/` (件数: **1**)
 - 階層インデックス: `02-knowledge/Docker-Laravel/index.json`
 
-### 📁 `02-knowledge/KaMeToKo/` (件数: **0**)
+### 📁 `02-knowledge/KaMeToKo/` (件数: **1**)
 - 階層インデックス: `02-knowledge/KaMeToKo/index.json`
 
-### 📁 `02-knowledge/personal-knowledge-base/` (件数: **0**)
+### 📁 `02-knowledge/personal-knowledge-base/` (件数: **1**)
 - 階層インデックス: `02-knowledge/personal-knowledge-base/index.json`
 
 ### 📁 `03-output/specifications/` (件数: **1**)

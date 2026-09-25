@@ -41,15 +41,15 @@
       "index_json": "02-knowledge/subsidies/index.json"
     },
     "02-knowledge/Docker-Laravel": {
-      "total_count": 0,
+      "total_count": 1,
       "index_json": "02-knowledge/Docker-Laravel/index.json"
     },
     "02-knowledge/KaMeToKo": {
-      "total_count": 0,
+      "total_count": 1,
       "index_json": "02-knowledge/KaMeToKo/index.json"
     },
     "02-knowledge/personal-knowledge-base": {
-      "total_count": 0,
+      "total_count": 1,
       "index_json": "02-knowledge/personal-knowledge-base/index.json"
     },
     "03-output/specifications": {
