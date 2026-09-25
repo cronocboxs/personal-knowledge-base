@@ -1,0 +1,12 @@
+{
+  "domain": "04-resources/subsidies",
+  "total_count": 1,
+  "nodes": [
+    {
+      "id": "subsidy-list-202609",
+      "title": "補助金・助成金一次情報収集リスト (2026年9月更新)",
+      "path": "04-resources/subsidies/subsidy-list-202609.md",
+      "tags": []
+    }
+  ]
+}

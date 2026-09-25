@@ -1,0 +1,36 @@
+{
+  "domain": "00-rules",
+  "total_count": 5,
+  "nodes": [
+    {
+      "id": "agent-behavior",
+      "title": "エージェント行動規範・連携規約",
+      "path": "00-rules/agent-behavior.md",
+      "tags": []
+    },
+    {
+      "id": "privacy-security",
+      "title": "セキュリティ・プライバシー規約",
+      "path": "00-rules/privacy-security.md",
+      "tags": []
+    },
+    {
+      "id": "workflow",
+      "title": "情報ライフサイクル・フロー規約",
+      "path": "00-rules/workflow.md",
+      "tags": []
+    },
+    {
+      "id": "classification",
+      "title": "ファイル分類・配置判定規約 (Classification & Routing Rules)",
+      "path": "00-rules/classification.md",
+      "tags": []
+    },
+    {
+      "id": "formatting",
+      "title": "ファイル命名・記述・メタデータ規約",
+      "path": "00-rules/formatting.md",
+      "tags": []
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "domains": {
+    "00-rules": {
+      "total_count": 5,
+      "index_json": "00-rules/index.json"
+    },
+    "02-knowledge": {
+      "total_count": 0,
+      "index_json": "02-knowledge/index.json"
+    },
+    "03-output": {
+      "total_count": 0,
+      "index_json": "03-output/index.json"
+    },
+    "04-resources": {
+      "total_count": 0,
+      "index_json": "04-resources/index.json"
+    },
+    "04-resources/logs": {
+      "total_count": 0,
+      "index_json": "04-resources/logs/index.json"
+    },
+    "04-resources/rules": {
+      "total_count": 1,
+      "index_json": "04-resources/rules/index.json"
+    },
+    "04-resources/subsidies": {
+      "total_count": 1,
+      "index_json": "04-resources/subsidies/index.json"
+    },
+    "05-todo": {
+      "total_count": 0,
+      "index_json": "05-todo/index.json"
+    },
+    "06-storage": {
+      "total_count": 0,
+      "index_json": "06-storage/index.json"
+    },
+    "02-knowledge/subsidies": {
+      "total_count": 54,
+      "index_json": "02-knowledge/subsidies/index.json"
+    }
+  }
+}

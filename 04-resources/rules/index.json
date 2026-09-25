@@ -1,0 +1,12 @@
+{
+  "domain": "04-resources/rules",
+  "total_count": 1,
+  "nodes": [
+    {
+      "id": "rules-change-20260920",
+      "title": "ルール改変ログ (2026-09-20)",
+      "path": "04-resources/rules/rules-change-20260920.md",
+      "tags": []
+    }
+  ]
+}
