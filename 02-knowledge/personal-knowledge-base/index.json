@@ -1,27 +1,5 @@
 {
   "domain": "02-knowledge/personal-knowledge-base",
-  "total_count": 2,
-  "nodes": [
-    {
-      "id": "overview",
-      "title": "personal-knowledge-base 挙動・処理仕様ナレッジ",
-      "path": "02-knowledge/personal-knowledge-base/overview.md",
-      "tags": [
-        "personal-knowledge-base",
-        "spec",
-        "code-analysis"
-      ]
-    },
-    {
-      "id": "deep-logic-trace",
-      "title": "personal-knowledge-base 最深部ロジック・処理トレースナレッジ",
-      "path": "02-knowledge/personal-knowledge-base/deep-logic-trace.md",
-      "tags": [
-        "personal-knowledge-base",
-        "spec",
-        "code-analysis",
-        "deep-logic"
-      ]
-    }
-  ]
+  "total_count": 0,
+  "nodes": []
 }

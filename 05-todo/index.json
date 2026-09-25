@@ -1,24 +1,5 @@
 {
   "domain": "05-todo",
-  "total_count": 3,
-  "nodes": [
-    {
-      "id": "ingest-kametoko",
-      "title": "ingest-kametoko",
-      "path": "05-todo/ingest-kametoko.md",
-      "tags": []
-    },
-    {
-      "id": "tasks",
-      "title": "tasks",
-      "path": "05-todo/tasks.md",
-      "tags": []
-    },
-    {
-      "id": "current",
-      "title": "現在のタスク進捗",
-      "path": "05-todo/current.md",
-      "tags": []
-    }
-  ]
+  "total_count": 0,
+  "nodes": []
 }
