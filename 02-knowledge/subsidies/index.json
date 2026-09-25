@@ -1,0 +1,549 @@
+{
+  "domain": "02-knowledge/subsidies",
+  "total_count": 49,
+  "nodes": [
+    {
+      "id": "edogawa-ku-tokubetsu-yushi",
+      "title": "江戸川区中小企業特別融資 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/edogawa-ku-tokubetsu-yushi.md",
+      "tags": [
+        "subsidy",
+        "edogawa-ku",
+        "finance",
+        "yushi"
+      ]
+    },
+    {
+      "id": "ibaraki-kaigai-hanshoku-shien",
+      "title": "茨城県海外販路開拓支援事業（輸出促進補助金） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/ibaraki-kaigai-hanshoku-shien.md",
+      "tags": [
+        "subsidy",
+        "ibaraki",
+        "japan"
+      ]
+    },
+    {
+      "id": "ibaraki-chiteki-zaisan-gaikoku-kokunai-shutsugan",
+      "title": "特許庁 知的財産活用支援（中小企業等外国出願支援事業） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/ibaraki-chiteki-zaisan-gaikoku-kokunai-shutsugan.md",
+      "tags": [
+        "subsidy",
+        "ibaraki",
+        "japan"
+      ]
+    },
+    {
+      "id": "ibaraki-chiiki-keizai-kenin-jigyo",
+      "title": "茨城県地域経済牽引事業促進補助金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/ibaraki-chiiki-keizai-kenin-jigyo.md",
+      "tags": [
+        "subsidy",
+        "ibaraki",
+        "japan"
+      ]
+    },
+    {
+      "id": "tokyo-josei-wakamono-senior-sogyo-support",
+      "title": "東京都女性・若者・シニア創業サポート事業（融資及び支援） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokyo-josei-wakamono-senior-sogyo-support.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "japan",
+        "startup"
+      ]
+    },
+    {
+      "id": "jukyu-shikakusha-sogyo-shien",
+      "title": "受給資格者創業支援等事業（中小機構共済・中小企業基盤整備） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/jukyu-shikakusha-sogyo-shien.md",
+      "tags": [
+        "subsidy",
+        "japan",
+        "smrj",
+        "startup",
+        "finance"
+      ]
+    },
+    {
+      "id": "tokyo-dentou-kogei-shinkou",
+      "title": "東京都伝統工芸品産業振興補助金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokyo-dentou-kogei-shinkou.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "japan"
+      ]
+    },
+    {
+      "id": "senryakuteki-kiban-gijutsu-kodo-shien",
+      "title": "戦略的基盤技術高度化支援事業（サポイン） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/senryakuteki-kiban-gijutsu-kodo-shien.md",
+      "tags": [
+        "subsidy",
+        "japan",
+        "monodukuri",
+        "r&d"
+      ]
+    },
+    {
+      "id": "tokyo-chusho-kigyo-dx-suishin-hojokin",
+      "title": "東京都中小企業DX推進補助金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokyo-chusho-kigyo-dx-suishin-hojokin.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "japan"
+      ]
+    },
+    {
+      "id": "tokkyo-chizai-katsuyo-shien",
+      "title": "特許庁 知的財産活用支援（中小企業等外国出願支援事業） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokkyo-chizai-katsuyo-shien.md",
+      "tags": [
+        "subsidy",
+        "japan",
+        "meto",
+        "inpit",
+        "chizai"
+      ]
+    },
+    {
+      "id": "tokyo-chushokigyo-gaishoku-shouene",
+      "title": "東京都中小企業外食店舗省エネルギー化支援事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokyo-chushokigyo-gaishoku-shouene.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "energy-saving",
+        "gaishoku",
+        "restaurant"
+      ]
+    },
+    {
+      "id": "edogawa-ku-jigyo-shikin-rishi-hokyukin",
+      "title": "江戸川区中小企業事業資金利子補給金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/edogawa-ku-jigyo-shikin-rishi-hokyukin.md",
+      "tags": [
+        "subsidy",
+        "edogawa-ku",
+        "tokyo",
+        "finance",
+        "loan"
+      ]
+    },
+    {
+      "id": "ibaraki-hatarakikata-joseikin",
+      "title": "茨城県働き方改革・女性活躍推進奨励金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/ibaraki-hatarakikata-joseikin.md",
+      "tags": [
+        "subsidy",
+        "ibaraki",
+        "japan"
+      ]
+    },
+    {
+      "id": "ibaraki-sogyo-venture",
+      "title": "茨城県創業ベンチャー支援事業（いばらきスタートアップ支援） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/ibaraki-sogyo-venture.md",
+      "tags": [
+        "subsidy",
+        "ibaraki",
+        "startup",
+        "venture"
+      ]
+    },
+    {
+      "id": "ibaraki-shouene-setsubi-donyu-shien",
+      "title": "茨城県中小企業小規模事業者省エネルギー設備導入支援事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/ibaraki-shouene-setsubi-donyu-shien.md",
+      "tags": [
+        "subsidy",
+        "ibaraki",
+        "japan"
+      ]
+    },
+    {
+      "id": "tokyo-chusho-kigyo-kokunai-tokkyo-shutoku-shien",
+      "title": "東京都中小企業国内特許取得支援事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokyo-chusho-kigyo-kokunai-tokkyo-shutoku-shien.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "japan"
+      ]
+    },
+    {
+      "id": "career-up-joseikin",
+      "title": "キャリアアップ助成金（正社員化コース等） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/career-up-joseikin.md",
+      "tags": [
+        "subsidy",
+        "japan",
+        "employment",
+        "mhlw"
+      ]
+    },
+    {
+      "id": "ibaraki-chiiki-tokusanhin-hanshoku-shien",
+      "title": "茨城県地域特産品販路拡大支援事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/ibaraki-chiiki-tokusanhin-hanshoku-shien.md",
+      "tags": [
+        "subsidy",
+        "ibaraki",
+        "hokuriku",
+        "kanto",
+        "manufacturing",
+        "food"
+      ]
+    },
+    {
+      "id": "ibaraki-nakashou-shouene-donyu",
+      "title": "茨城県中小企業小規模事業者省エネルギー設備導入支援事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/ibaraki-nakashou-shouene-donyu.md",
+      "tags": [
+        "subsidy",
+        "ibaraki",
+        "energy-saving",
+        "decarbonization"
+      ]
+    },
+    {
+      "id": "tokyo-shotengai-digital-suishin",
+      "title": "東京都商店街デジタル化推進事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokyo-shotengai-digital-suishin.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "shotengai",
+        "digital"
+      ]
+    },
+    {
+      "id": "tokyo-chusho-kigyo-katsuryoku-kojo-project",
+      "title": "東京都中小企業活力向上プロジェクト（事業革新） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokyo-chusho-kigyo-katsuryoku-kojo-project.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "japan"
+      ]
+    },
+    {
+      "id": "monodukuri-seisansei-kojo-hojo",
+      "title": "ものづくり・商業・サービス生産性向上促進補助金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/monodukuri-seisansei-kojo-hojo.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "japan",
+        "monodukuri",
+        "productivity"
+      ]
+    },
+    {
+      "id": "tokyo-senior-shigoto-ouen-project",
+      "title": "東京都シニアしごと応援プロジェクト 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokyo-senior-shigoto-ouen-project.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "japan"
+      ]
+    },
+    {
+      "id": "edogawa-ku-tenpo-kaiso-jyoseikin",
+      "title": "江戸川区店舗等改装費助成金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/edogawa-ku-tenpo-kaiso-jyoseikin.md",
+      "tags": [
+        "subsidy",
+        "edogawa-ku",
+        "tokyo",
+        "retail",
+        "renovation"
+      ]
+    },
+    {
+      "id": "edo-godo-setsumeikai-shussan-shien",
+      "title": "江戸川区合同企業説明会・就職面接会出展支援 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/edo-godo-setsumeikai-shussan-shien.md",
+      "tags": [
+        "subsidy",
+        "edogawa-ku",
+        "tokyo",
+        "japan",
+        "recruitment"
+      ]
+    },
+    {
+      "id": "ibaraki-chusho-kigyo-dx-suishin-hojokin",
+      "title": "茨城県中小企業DX推進支援補助金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/ibaraki-chusho-kigyo-dx-suishin-hojokin.md",
+      "tags": [
+        "subsidy",
+        "ibaraki",
+        "tokyo",
+        "japan"
+      ]
+    },
+    {
+      "id": "ibaraki-nosan-noshoko-renkei-6jika",
+      "title": "茨城県農商工連携・6次産業化推進事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/ibaraki-nosan-noshoko-renkei-6jika.md",
+      "tags": [
+        "subsidy",
+        "ibaraki",
+        "japan"
+      ]
+    },
+    {
+      "id": "ibaraki-jigyou-shoukei-ma",
+      "title": "茨城県事業承継・M&A支援補助金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/ibaraki-jigyou-shoukei-ma.md",
+      "tags": [
+        "subsidy",
+        "ibaraki",
+        "succession",
+        "m-a"
+      ]
+    },
+    {
+      "id": "jinzai-kakuho-joseikin-hatarakikata-shien-course",
+      "title": "人材確保等支援助成金（働き方支援コース） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/jinzai-kakuho-joseikin-hatarakikata-shien-course.md",
+      "tags": [
+        "subsidy",
+        "japan",
+        "mhlw",
+        "employment",
+        "labor"
+      ]
+    },
+    {
+      "id": "shouene-toushi-sokusin-sii",
+      "title": "省エネルギー投資促進支援事業費補助金（SII） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/shouene-toushi-sokusin-sii.md",
+      "tags": [
+        "subsidy",
+        "japan",
+        "energy-saving",
+        "sii"
+      ]
+    },
+    {
+      "id": "edogawa-ku-taishokukin-kakekin-hojokin",
+      "title": "江戸川区中小企業退職金共済掛金補助金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/edogawa-ku-taishokukin-kakekin-hojokin.md",
+      "tags": [
+        "subsidy",
+        "edogawa-ku",
+        "tokyo",
+        "welfare"
+      ]
+    },
+    {
+      "id": "edogawa-ku-tokubetsu-yushi-assen",
+      "title": "江戸川区中小企業融資あっせん（特別資金） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/edogawa-ku-tokubetsu-yushi-assen.md",
+      "tags": [
+        "subsidy",
+        "edogawa-ku",
+        "tokyo",
+        "yushi",
+        "finance"
+      ]
+    },
+    {
+      "id": "sokibo-jizokuka-hojo",
+      "title": "小規模事業者持続化補助金（一般型） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/sokibo-jizokuka-hojo.md",
+      "tags": [
+        "subsidy",
+        "japan",
+        "nationwide",
+        "small-business"
+      ]
+    },
+    {
+      "id": "yakushin-jigyo",
+      "title": "躍進的な事業展開力支援事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/yakushin-jigyo.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "japan"
+      ]
+    },
+    {
+      "id": "ibaraki-green-decarbonization-support",
+      "title": "茨城県グリーン・脱炭素化推進補助金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/ibaraki-green-decarbonization-support.md",
+      "tags": [
+        "subsidy",
+        "ibaraki",
+        "green",
+        "decarbonization",
+        "energy-saving"
+      ]
+    },
+    {
+      "id": "tokyo-design-keiei-donyu-sokushin",
+      "title": "東京都デザイン経営導入促進支援事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokyo-design-keiei-donyu-sokushin.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "japan"
+      ]
+    },
+    {
+      "id": "tokyo-ikuji-kaigo-koyo-antei",
+      "title": "東京都育児・介護雇用安定等助成金（東京都女性活躍推進等） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokyo-ikuji-kaigo-koyo-antei.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "employment",
+        "ikuji",
+        "kaigo"
+      ]
+    },
+    {
+      "id": "tokyo-chusho-kigyo-gaikoku-shutsugan-shien",
+      "title": "東京都中小企業外国出願支援事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokyo-chusho-kigyo-gaikoku-shutsugan-shien.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "japan",
+        "intellectual-property"
+      ]
+    },
+    {
+      "id": "edogawa-ku-eko-jigyosho-setsubi-hojo",
+      "title": "江戸川区エコ事業所表彰・環境配慮設備導入補助 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/edogawa-ku-eko-jigyosho-setsubi-hojo.md",
+      "tags": [
+        "subsidy",
+        "edogawa-ku",
+        "tokyo",
+        "japan",
+        "ibaraki"
+      ]
+    },
+    {
+      "id": "edogawa-ku-akitempo-katsuyo-sogyo-shien",
+      "title": "江戸川区空き店舗活用創業支援事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/edogawa-ku-akitempo-katsuyo-sogyo-shien.md",
+      "tags": [
+        "subsidy",
+        "edogawa-ku",
+        "tokyo",
+        "entrepreneurship",
+        "store-renovation"
+      ]
+    },
+    {
+      "id": "edogawa-ku-godo-kigyo-setsumeikai",
+      "title": "江戸川区合同企業説明会・就職面接会出展支援 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/edogawa-ku-godo-kigyo-setsumeikai.md",
+      "tags": [
+        "subsidy",
+        "edogawa-ku",
+        "japan",
+        "hr",
+        "recruitment"
+      ]
+    },
+    {
+      "id": "ibaraki-monodukuri-chusho-kigyo-gijutsu-kaihatsu",
+      "title": "茨城県ものづくり中小企業技術開発補助金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/ibaraki-monodukuri-chusho-kigyo-gijutsu-kaihatsu.md",
+      "tags": [
+        "subsidy",
+        "ibaraki",
+        "manufacturing",
+        "r-and-d",
+        "technology"
+      ]
+    },
+    {
+      "id": "it-donyu-hojokin",
+      "title": "IT導入補助金（IT導入支援） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/it-donyu-hojokin.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "japan"
+      ]
+    },
+    {
+      "id": "edogawa-ku-dx-telework",
+      "title": "江戸川区中小企業DX・テレワーク環境整備支援補助金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/edogawa-ku-dx-telework.md",
+      "tags": [
+        "subsidy",
+        "edogawa-ku",
+        "tokyo",
+        "dx",
+        "telework"
+      ]
+    },
+    {
+      "id": "tokyo-shougaisha-koyo-excellent-company-josei",
+      "title": "東京都障害者雇用エクセレントカンパニー賞関連助成 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokyo-shougaisha-koyo-excellent-company-josei.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "employment",
+        "disability"
+      ]
+    },
+    {
+      "id": "sokibo-jizokuka-hojo-ippangata",
+      "title": "小規模事業者持続化補助金（一般型） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/sokibo-jizokuka-hojo-ippangata.md",
+      "tags": [
+        "subsidy",
+        "japan",
+        "small-business",
+        "marketing"
+      ]
+    },
+    {
+      "id": "edogawa-ku-sogyo-shien-incubation",
+      "title": "江戸川区創業支援・インキュベーション施設活用補助金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/edogawa-ku-sogyo-shien-incubation.md",
+      "tags": [
+        "subsidy",
+        "edogawa-ku",
+        "tokyo",
+        "sogyo"
+      ]
+    },
+    {
+      "id": "edogawa-ku-chiteki-zaisan",
+      "title": "江戸川区知的財産権取得支援事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/edogawa-ku-chiteki-zaisan.md",
+      "tags": [
+        "subsidy",
+        "edogawa-ku",
+        "tokyo",
+        "intellectual-property"
+      ]
+    },
+    {
+      "id": "jigyou-shoukei-hojokin",
+      "title": "事業承継・引継ぎ補助金 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/jigyou-shoukei-hojokin.md",
+      "tags": [
+        "subsidy",
+        "japan",
+        "nationwide",
+        "jigyou-shoukei"
+      ]
+    }
+  ]
+}
