@@ -1,12 +1,8 @@
 ---
 title: "KaMeToKo リポジトリ解析・最深部ロジックナレッジ"
 repo: "KaMeToKo"
-phase: 2
-unexplored_domains:
-  - "app/app/Http/Controllers/Auth"
-  - "app/app/Services/ReservationService.php"
-  - "app/app/Services/AttendanceService.php"
-  - "app/database/migrations"
+phase: 3
+unexplored_domains: []
 created_at: "2026-09-25"
 updated_at: "2026-09-25"
 ---
@@ -19,9 +15,18 @@ KaMeToKo はLaravelベースの予約・勤怠・ストア管理システムで�
 ## 2. インターフェース・最深部処理トレース
 
 ### 2.1 ルーティングとエントリーポイント
-- **Web Routes**: `app/routes/web/user.php`, `app/routes/web/system.php`, `app/routes/web/api.php` 等に分割・定義されており、ユーザー向け、管理者（システム）向け、API向けの各ルートグループにディスパッチされます。
-- **Public Routes**: `app/routes/public/` 配下にて認証不要の予約受付やヘルプページが公開されています。
+- **Web/API/System/Provider Routes**: `app/routes/` 配下に分割・定義されており、ユーザー向け、プロバイダー（店舗管理）向け、システム管理者向け、API向けの各ルートグループにディスパッチされます。
+- **Public/Auth Routes**: パスキー認証、Google OAuth認証、パスワードリセット、各種公開APIエンドポイント（`LoginController`, `PasskeyController`, `GoogleAuthController` 等）によるセキュアな認証基盤が構築されています。
 
-### 2.2 予約・勤怠管理サービス層のトレース
-- **ReservationService**: 予約作成・変更・キャンセル時における空き枠バリデーション、排他制御（データベーストランザクション、ロック）、通知メール送信の最深部ロジックを保有します。
-- **AttendanceService**: ストアスタッフの勤怠打刻（出退勤、休憩）、月次集計ロジックを処理します。
+### 2.2 予約・勤怠・ストア管理サービス層の最深部トレース
+- **ReservationService (`app/app/Services/Service/Reservation/`)**:
+  - 予約作成・変更・キャンセル時におけるコース選択・スタッフ割り当て・空き枠バリデーションの最深部ロジック。
+  - データベーストランザクションと排他制御により、同時予約時の競合を防ぎ整合性を担保。
+- **AttendanceService (`app/app/Services/Service/Attendance/`)**:
+  - スタッフの出退勤打刻（Timestamp）、勤務申請、月次集計結果の算出ロジック。
+  - マネージャー権限による承認ワークフローと連携。
+- **Store & Service管理**:
+  - 店舗ごとの営業時間、設定、サービス提供者（Provider）とユーザー（User）の中間テーブルによる権限マッピング。
+
+### 2.3 データベースマイグレーション設計
+- `04-resources/git-repository/KaMeToKo/clone/dev_local/app/database/migrations/mysql/` 配下に、セッション、アクションログ、ユーザー、マルチテナント型プロバイダー、メッセージルーム、チャット、カレンダー、勤怠、店舗、予約、パスキー（WebAuthn）などのマイグレーションが網羅的に定義されています。
