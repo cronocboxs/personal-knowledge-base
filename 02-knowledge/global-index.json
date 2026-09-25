@@ -29,7 +29,7 @@
       "index_json": "04-resources/subsidies/index.json"
     },
     "05-todo": {
-      "total_count": 0,
+      "total_count": 3,
       "index_json": "05-todo/index.json"
     },
     "06-storage": {
@@ -39,6 +39,22 @@
     "02-knowledge/subsidies": {
       "total_count": 54,
       "index_json": "02-knowledge/subsidies/index.json"
+    },
+    "02-knowledge/Docker-Laravel": {
+      "total_count": 2,
+      "index_json": "02-knowledge/Docker-Laravel/index.json"
+    },
+    "02-knowledge/KaMeToKo": {
+      "total_count": 12,
+      "index_json": "02-knowledge/KaMeToKo/index.json"
+    },
+    "02-knowledge/personal-knowledge-base": {
+      "total_count": 2,
+      "index_json": "02-knowledge/personal-knowledge-base/index.json"
+    },
+    "03-output/specifications": {
+      "total_count": 1,
+      "index_json": "03-output/specifications/index.json"
     }
   }
 }

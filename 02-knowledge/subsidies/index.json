@@ -1,6 +1,6 @@
 {
   "domain": "02-knowledge/subsidies",
-  "total_count": 49,
+  "total_count": 54,
   "nodes": [
     {
       "id": "edogawa-ku-tokubetsu-yushi",
@@ -88,6 +88,16 @@
       ]
     },
     {
+      "id": "edogawa-ku-shika-shien-jigyo",
+      "title": "江戸川区中小企業向け福利厚生・健康支援（歯科健診・医療連携）事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/edogawa-ku-shika-shien-jigyo.md",
+      "tags": [
+        "subsidy",
+        "edogawa-ku",
+        "japan"
+      ]
+    },
+    {
       "id": "tokyo-chusho-kigyo-dx-suishin-hojokin",
       "title": "東京都中小企業DX推進補助金 詳細解読ナレッジ",
       "path": "02-knowledge/subsidies/tokyo-chusho-kigyo-dx-suishin-hojokin.md",
@@ -107,6 +117,16 @@
         "meto",
         "inpit",
         "chizai"
+      ]
+    },
+    {
+      "id": "tokyo-chushokigyo-shokuhin-export",
+      "title": "東京都中小企業食品輸出促進事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokyo-chushokigyo-shokuhin-export.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "japan"
       ]
     },
     {
@@ -262,6 +282,18 @@
         "tokyo",
         "retail",
         "renovation"
+      ]
+    },
+    {
+      "id": "ibaraki-chuo-kosetsu-shiken-kikan-renkei-gijutsu-kaihatsu",
+      "title": "茨城県中小企業中央会・公設試験研究機関連携技術開発支援事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/ibaraki-chuo-kosetsu-shiken-kikan-renkei-gijutsu-kaihatsu.md",
+      "tags": [
+        "subsidy",
+        "ibaraki",
+        "japan",
+        "manufacturing",
+        "r-and-d"
       ]
     },
     {
@@ -445,6 +477,18 @@
       ]
     },
     {
+      "id": "edogawa-ku-tokubetsu-yushi-tokubetsu-shikin",
+      "title": "江戸川区中小企業融資あっせん（特別資金） 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/edogawa-ku-tokubetsu-yushi-tokubetsu-shikin.md",
+      "tags": [
+        "subsidy",
+        "edogawa-ku",
+        "tokyo",
+        "finance",
+        "yushi"
+      ]
+    },
+    {
       "id": "edogawa-ku-godo-kigyo-setsumeikai",
       "title": "江戸川区合同企業説明会・就職面接会出展支援 詳細解読ナレッジ",
       "path": "02-knowledge/subsidies/edogawa-ku-godo-kigyo-setsumeikai.md",
@@ -488,6 +532,18 @@
         "tokyo",
         "dx",
         "telework"
+      ]
+    },
+    {
+      "id": "tokyo-ai-dx-jissho-jigyo",
+      "title": "東京都AI・DX実証実験プロジェクト支援事業 詳細解読ナレッジ",
+      "path": "02-knowledge/subsidies/tokyo-ai-dx-jissho-jigyo.md",
+      "tags": [
+        "subsidy",
+        "tokyo",
+        "japan",
+        "ai",
+        "dx"
       ]
     },
     {

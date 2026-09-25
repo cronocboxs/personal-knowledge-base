@@ -1,0 +1,12 @@
+{
+  "domain": "03-output/specifications",
+  "total_count": 1,
+  "nodes": [
+    {
+      "id": "Docker-Laravel-spec",
+      "title": "Docker-Laravel 仕様書",
+      "path": "03-output/specifications/Docker-Laravel-spec.md",
+      "tags": []
+    }
+  ]
+}

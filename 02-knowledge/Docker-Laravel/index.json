@@ -1,0 +1,29 @@
+{
+  "domain": "02-knowledge/Docker-Laravel",
+  "total_count": 2,
+  "nodes": [
+    {
+      "id": "overview",
+      "title": "Docker-Laravel リポジトリ概要・機能目録 (Phase 1)",
+      "path": "02-knowledge/Docker-Laravel/overview.md",
+      "tags": [
+        "Docker-Laravel",
+        "spec",
+        "code-analysis",
+        "overview"
+      ]
+    },
+    {
+      "id": "infrastructure",
+      "title": "Docker-Laravel インフラ・構成詳細・最深部ロジック仕様ナレッジ",
+      "path": "02-knowledge/Docker-Laravel/infrastructure.md",
+      "tags": [
+        "Docker-Laravel",
+        "spec",
+        "code-analysis",
+        "infrastructure",
+        "deep-logic"
+      ]
+    }
+  ]
+}
