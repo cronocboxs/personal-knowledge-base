@@ -10,7 +10,9 @@
 2. **Digest & Facting**: `04-resources/` の一次情報を分析・抽出・整理し、自分に関する事実や抽象化した知見として `02-knowledge/` に書き起こす。
 3. **Action**: 情報整理に伴い発生したタスクや進行中の作業を `05-todo/` で管理する。
 4. **Output**: `02-knowledge/` に蓄積された知見・事実を元に再構成・執筆し、`03-output/` で成果物を生成する。
-5. **Archive / Storage**: 完了した大容量成果物・一次メディアは `06-storage/` へ移動しクラウド/外部ストレージ（Google Drive/NFS等）に同期する。不要物は `99-trash/` へ移動する。
+5. **Index Sync & Integration (インデックス同期)**:
+   - ナレッジの新規追加・編集・削除、成果物出力を行った後は、**必ず `./scripts/run-markdown-index.sh <対象パス>` を実行**し、該当階層および `02-knowledge/global-index.json` を最新状態に同期すること。
+6. **Archive / Storage**: 完了した大容量成果物・一次メディアは `06-storage/` へ移動しクラウド/外部ストレージ（Google Drive/NFS等）に同期する。不要物は `99-trash/` へ移動する。
 
 ---
 
@@ -38,6 +40,10 @@
   - **「終わりなき再走査」**: Phase 3 または 4 で `unexplored_domains` が空になった後も、次回セッション時・問合せ時に**必ず対象コード全域を再走査**する。
   - **比較・差分検出**: 走査結果を `02-knowledge/` に溜め込んだ記述内容と比較し、**「まだナレッジに書かれていない奥の処理・未確認の分岐・見落とし領域」**を自動発掘する。
   - **ループ（Phase 2/4 への自動引き下げ）**: 未確認領域が見つかった場合、それを `unexplored_domains` に即座に追記し、**自動的に `phase: 2` または `phase: 4` へリセットして深掘り追跡を無限に再開**する。
+
+- **Phase 完了・セッション終了時の同期義務**:
+  - 各 Phase（Phase 1〜5）のタスク消化や `unexplored_domains` の更新、ファイルのコミット直前には、必ず `./scripts/run-markdown-index.sh 02-knowledge/subsidies` 等を実行して階層インデックスを最新化すること。
+  - 次回起動時・別セッションのエージェントは更新された `index.json` を起点として即座に深掘りを再開する。
 
 ---
 
