@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # scripts/run-goose-task.sh
 # 指定されたスキル名（またはタスク指示書パス）を受け取り、Goose を非対話実行する汎用スクリプト
+# 429等のエラー発生時は5分間（300秒）待機して再実行する。
 
 set -e
 
@@ -9,10 +10,11 @@ cd "${PROJECT_DIR}"
 
 INPUT_TARGET="${1:?エラー: スキル名またはタスク指示書のパスを指定してください (例: ingest-repo-knowledge)}"
 
-# 1. 渡された引数がファイルパスそのものかチェック
+# 1. 渡された引数がファイルパスかスキル名かチェック
+SESSION_NAME="$(echo "${INPUT_TARGET}" | sed 's/[^a-zA-Z0-9_-]/_/g')"
+
 if [ -f "${INPUT_TARGET}" ]; then
   TASK_FILE="${INPUT_TARGET}"
-# 2. ディレクトリ名指定の場合: .agents/skills/<スキル名>/SKILL.md を検索
 elif [ -f ".agents/skills/${INPUT_TARGET}/SKILL.md" ]; then
   TASK_FILE=".agents/skills/${INPUT_TARGET}/SKILL.md"
 else
@@ -32,7 +34,6 @@ mkdir -p "${API_USAGE_DIR}"
 TMP_RUN_LOG="${LOG_DIR}/goose_last_run.log"
 ERROR_STATE_FILE="${LOG_DIR}/consecutive_error_count.txt"
 
-# 日付別集計ファイルのパス (例: 04-resources/logs/api_usage/2026-09-20.log)
 TODAY=$(date +"%Y-%m-%d")
 DAILY_LOG_FILE="${API_USAGE_DIR}/${TODAY}.log"
 
@@ -49,32 +50,52 @@ echo "=========================================="
 echo "🤖 Goose タスク実行開始: ${TASK_FILE} ($(date))"
 echo "=========================================="
 
-# RUST_LOG=debug を付与して Goose を実行し、ログを取得
+# 2. タスク実行（標準の goose run）
+run_goose() {
+  RUST_LOG=debug goose run -i "${TASK_FILE}" 2>&1 | tee "${TMP_RUN_LOG}"
+}
+
+# 初回実行
 set +e
-RUST_LOG=debug goose run -i "${TASK_FILE}" 2>&1 | tee "${TMP_RUN_LOG}"
+run_goose
 GOOSE_EXIT_CODE=${PIPESTATUS[0]}
 set -e
 
-# ----------------------------------------------------
-# 🔍 検知機能 1: APIエラー・レートリミットの解析
-# ----------------------------------------------------
-# ログ内から明確なエラーレスポンス（HTTP 429/500/503 等）を検出
-API_ERROR_DETECTED=$(grep -i -c -E "status:\s*(429|500|503)|HTTP/(1\.1|2)\s+(429|500|503)|rate\s*limit\s*exceeded|quota\s*exceeded|resourceexhausted" "${TMP_RUN_LOG}" || true)
+# ログ内から 429 / Rate limit / Quota 等のエラーを判定
+API_ERROR_DETECTED=$(grep -i -c -E "Rate limit exceeded|Quota exceeded|429|resourceexhausted|status:\s*(429|500|503)" "${TMP_RUN_LOG}" || true)
 
-# 1. Gooseプロセスが正常終了 (exit 0) した場合 ➔ ログの内容にかかわらず「完全成功」
-if [ ${GOOSE_EXIT_CODE} -eq 0 ]; then
-  CONSECUTIVE_ERRORS=0
-  echo 0 > "${ERROR_STATE_FILE}"
+# ----------------------------------------------------
+# 🔄 レートリミット時の 5分間ウェイト＆再試行処理
+# ----------------------------------------------------
+if [ ${API_ERROR_DETECTED} -gt 0 ]; then
+  echo "⚠️ APIレート制限（429等）を検知しました。5分間（300秒）待機してタスクを再実行します..."
+  sleep 300
 
-# 2. Gooseプロセスが異常終了 (exit non-zero) し、かつ明確なAPIエラーが検知された場合
-else
-  CONSECUTIVE_ERRORS=$((CONSECUTIVE_ERRORS + 1))
-  echo "${CONSECUTIVE_ERRORS}" > "${ERROR_STATE_FILE}"
-  echo "⚠️ [警告] APIエラーまたはプロセス異常を検知しました (連続 ${CONSECUTIVE_ERRORS} 回目)"
+  echo "🔄 5分経過: タスクを再実行します..."
+  set +e
+  run_goose
+  GOOSE_EXIT_CODE=${PIPESTATUS[0]}
+  set -e
+
+  # 再試行後のログで再判定
+  API_ERROR_DETECTED=$(grep -i -c -E "Rate limit exceeded|Quota exceeded|429|resourceexhausted|status:\s*(429|500|503)" "${TMP_RUN_LOG}" || true)
 fi
 
 # ----------------------------------------------------
-# 📊 集計機能: 今回の API 問い合わせ回数
+# 🔍 検知＆判定機能
+# ----------------------------------------------------
+if [ ${GOOSE_EXIT_CODE} -eq 0 ] && [ ${API_ERROR_DETECTED} -eq 0 ]; then
+  CONSECUTIVE_ERRORS=0
+  echo 0 > "${ERROR_STATE_FILE}"
+  echo "✅ タスクが正常に完了しました。"
+else
+  CONSECUTIVE_ERRORS=$((CONSECUTIVE_ERRORS + 1))
+  echo "${CONSECUTIVE_ERRORS}" > "${ERROR_STATE_FILE}"
+  echo "⚠️ [警告] APIエラーまたはプロセス異常を検知しました (Exit Code: ${GOOSE_EXIT_CODE}, 連続 ${CONSECUTIVE_ERRORS} 回目)"
+fi
+
+# ----------------------------------------------------
+# 📊 集計機能: API 問い合わせ回数
 # ----------------------------------------------------
 API_CALL_COUNT=$(grep -i -c -E "generate_content|generativelanguage|google" "${TMP_RUN_LOG}" || true)
 
@@ -87,7 +108,7 @@ if [ -f "${DAILY_LOG_FILE}" ]; then
 fi
 
 NEW_TOTAL=$((PREV_TOTAL + API_CALL_COUNT))
-echo "$(date +'%Y-%m-%d %H:%M:%S') - 今回: ${API_CALL_COUNT} 回 | 日別累計: ${NEW_TOTAL} | 連続エラー: ${CONSECUTIVE_ERRORS}" >> "${DAILY_LOG_FILE}"
+echo "$(date +'%Y-%m-%d %H:%M:%S') - [${SESSION_NAME}] 今回: ${API_CALL_COUNT} 回 | 日別累計: ${NEW_TOTAL} | 連続エラー: ${CONSECUTIVE_ERRORS}" >> "${DAILY_LOG_FILE}"
 
 echo "------------------------------------------"
 echo "📊 実行結果サマリー:"
@@ -98,12 +119,9 @@ echo "   ・今回 API 問い合わせ回数: ${API_CALL_COUNT} 回"
 echo "   ・本日（${TODAY}）の総問い合わせ回数: ${NEW_TOTAL} 回"
 echo "=========================================="
 
-# ----------------------------------------------------
-# 🛑 検知機能 2: 5回連続エラー時の安全停止ガード
-# ----------------------------------------------------
+# 🛑 5回連続エラー時の安全停止ガード
 if [ ${CONSECUTIVE_ERRORS} -ge 5 ]; then
-  echo "❌ 【安全停止】5回連続でAPIエラーが発生したため、コスト保護のため処理を完全停止します。"
-  echo "   (状態リセットが必要な場合は '${ERROR_STATE_FILE}' を削除してください)"
+  echo "❌ 【安全停止】5回連続でエラーが発生したため、コスト保護のため処理を完全停止します。"
   exit 99
 fi
 
