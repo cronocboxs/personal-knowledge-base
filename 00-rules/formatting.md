@@ -23,8 +23,8 @@ parent: [] # 上位ノート（親）
 children: [] # 下位ノート（子）
 related: [] # 連動・参照する関連ノート
 task: [] # 解析対象・次タスク
+summary: "ノートの概要・責務を1〜2文で記述（SQLite + nomic-embed-text の検索インデックス用）"
 ---
-```
 
 ### `task` プロパティの記述パターン
 
