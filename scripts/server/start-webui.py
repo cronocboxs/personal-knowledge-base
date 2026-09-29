@@ -1,86 +1,14 @@
 import os
 import re
-import json
 import datetime
-import urllib.request
 import subprocess
-import sqlite3
-import math
 import streamlit as st
-
-# ---------------------------------------------------------
-# パス定義: プロジェクトルートの絶対パスを取得 (scripts/server/ から2階層上)
-# ---------------------------------------------------------
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "../../"))
-
-# 各種ファイル・ディレクトリの絶対パス
-CONFIG_PATH = os.path.join(SCRIPT_DIR, "settings.json")
-PRIVATE_DIR = os.path.join(PROJECT_ROOT, "01-private")
-RULES_DIR = os.path.join(PROJECT_ROOT, "00-rules")
-RESOURCES_DIR = os.path.join(PROJECT_ROOT, "04-resources")
-KNOWLEDGE_DIR = os.path.join(PROJECT_ROOT, "02-knowledge")
-DB_PATH = os.path.join(PRIVATE_DIR, "knowledge_index.db")
-
-OLLAMA_ENDPOINT = "http://localhost:11434"
-EMBED_MODEL = "nomic-embed-text"
-
-# ---------------------------------------------------------
-# 設定ファイルの読み込み
-# ---------------------------------------------------------
-DEFAULT_CONFIG = {
-    "default_provider": "Ollama (Local LLM)",
-    "gemini": {
-        "default_model": "gemini-2.5-flash",
-        "available_models": [
-            "gemini-2.5-flash",
-            "gemini-2.5-pro",
-            "gemini-1.5-flash",
-            "gemini-1.5-pro"
-        ]
-    },
-    "ollama": {
-        "default_model": "qwen2.5:1.5b",
-        "endpoint": "http://localhost:11434"
-    }
-}
-
-def load_config() -> dict:
-    if os.path.exists(CONFIG_PATH):
-        try:
-            with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            pass
-    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-        json.dump(DEFAULT_CONFIG, f, indent=2, ensure_ascii=False)
-    return DEFAULT_CONFIG
+from config import PROJECT_ROOT, KNOWLEDGE_DIR, RESOURCES_DIR, load_config, get_gemini_api_key
+from rag_service import search_relevant_knowledge
+from knowledge_service import generate_knowledge_files, auto_sublimate_rag_answer
+from llm_client import call_llm
 
 config = load_config()
-
-# 画面基本設定
-st.set_page_config(page_title="Personal Knowledge Base", layout="wide")
-st.title("🧠 Personal Knowledge Base WebUI")
-
-# ---------------------------------------------------------
-# Session State の初期化
-# ---------------------------------------------------------
-if "edit_mode" not in st.session_state:
-    st.session_state["edit_mode"] = False
-if "form_title" not in st.session_state:
-    st.session_state["form_title"] = ""
-if "form_content" not in st.session_state:
-    st.session_state["form_content"] = ""
-if "form_input_type_idx" not in st.session_state:
-    st.session_state["form_input_type_idx"] = 0
-if "form_category" not in st.session_state:
-    st.session_state["form_category"] = "default"
-if "form_subdir" not in st.session_state:
-    st.session_state["form_subdir"] = ""
-if "last_rag_answer" not in st.session_state:
-    st.session_state["last_rag_answer"] = ""
-if "last_rag_query" not in st.session_state:
-    st.session_state["last_rag_query"] = ""
 
 # ---------------------------------------------------------
 # ヘルパー関数: ツリー構築・ファイル取得
@@ -116,96 +44,30 @@ def get_ollama_models() -> list[str]:
     except Exception:
         return [default_ollama]
 
-# ---------------------------------------------------------
-# ヘルパー関数: ルート基準での Gemini API キー読み込み
-# ---------------------------------------------------------
-def get_gemini_api_key() -> str:
-    candidate_files = [
-        os.path.join(PRIVATE_DIR, "gemini_api_key.txt"),
-        os.path.join(PRIVATE_DIR, "gemini-api-key"),
-        os.path.join(PRIVATE_DIR, "api_key.txt")
-    ]
-    for file_path in candidate_files:
-        if os.path.exists(file_path):
-            try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    key = f.read().strip()
-                    if key:
-                        return key
-            except Exception:
-                pass
-    return os.environ.get("GEMINI_API_KEY", "").strip()
+
+# 画面基本設定
+st.set_page_config(page_title="Personal Knowledge Base", layout="wide")
+st.title("🧠 Personal Knowledge Base WebUI")
 
 # ---------------------------------------------------------
-# RAG ヘルパー関数: ベクトル計算 & SQLite 類似度検索
+# Session State の初期化
 # ---------------------------------------------------------
-def get_query_embedding(text: str) -> list[float]:
-    url = f"{OLLAMA_ENDPOINT.rstrip('/')}/api/embeddings"
-    payload = json.dumps({
-        "model": EMBED_MODEL,
-        "prompt": text
-    }).encode("utf-8")
-    
-    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-    try:
-        with urllib.request.urlopen(req) as res:
-            res_data = json.loads(res.read().decode("utf-8"))
-            return res_data.get("embedding", [])
-    except Exception as e:
-        st.error(f"⚠️ 質問文のベクトル変換エラー (Ollamaが稼働しているか確認してください): {e}")
-        return []
-
-def cosine_similarity(v1: list[float], v2: list[float]) -> float:
-    if not v1 or not v2 or len(v1) != len(v2):
-        return 0.0
-    dot_product = sum(a * b for a, b in zip(v1, v2))
-    norm_v1 = math.sqrt(sum(a * a for a in v1))
-    norm_v2 = math.sqrt(sum(b * b for b in v2))
-    if norm_v1 == 0 or norm_v2 == 0:
-        return 0.0
-    return dot_product / (norm_v1 * norm_v2)
-
-def search_relevant_knowledge(query: str, top_k: int = 3, target_categories: list[str] = None) -> list[dict]:
-    if not os.path.exists(DB_PATH):
-        return []
-
-    query_vec = get_query_embedding(query)
-    if not query_vec:
-        return []
-
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
-    if target_categories and "すべて" not in target_categories:
-        placeholders = ','.join(['?'] * len(target_categories))
-        sql = f"SELECT rel_path, category, title, summary, content, embedding FROM knowledge_index WHERE category IN ({placeholders})"
-        cursor.execute(sql, target_categories)
-    else:
-        cursor.execute("SELECT rel_path, category, title, summary, content, embedding FROM knowledge_index")
-        
-    rows = cursor.fetchall()
-    conn.close()
-
-    results = []
-    for rel_path, category, title, summary, content, emb_str in rows:
-        if not emb_str:
-            continue
-        try:
-            doc_vec = json.loads(emb_str)
-            score = cosine_similarity(query_vec, doc_vec)
-            results.append({
-                "rel_path": rel_path,
-                "category": category,
-                "title": title,
-                "summary": summary,
-                "content": content,
-                "score": score
-            })
-        except Exception:
-            pass
-
-    results.sort(key=lambda x: x["score"], reverse=True)
-    return results[:top_k]
+if "edit_mode" not in st.session_state:
+    st.session_state["edit_mode"] = False
+if "form_title" not in st.session_state:
+    st.session_state["form_title"] = ""
+if "form_content" not in st.session_state:
+    st.session_state["form_content"] = ""
+if "form_input_type_idx" not in st.session_state:
+    st.session_state["form_input_type_idx"] = 0
+if "form_category" not in st.session_state:
+    st.session_state["form_category"] = "default"
+if "form_subdir" not in st.session_state:
+    st.session_state["form_subdir"] = ""
+if "last_rag_answer" not in st.session_state:
+    st.session_state["last_rag_answer"] = ""
+if "last_rag_query" not in st.session_state:
+    st.session_state["last_rag_query"] = ""
 
 # ---------------------------------------------------------
 # サイドバー: 1. AIモデル設定
@@ -351,181 +213,10 @@ st.sidebar.markdown("---")
 st.sidebar.subheader("📥 04-resources")
 render_explorer_tree(RESOURCES_DIR, is_knowledge=False)
 
-# ---------------------------------------------------------
-# 汎用LLM呼び出し関数
-# ---------------------------------------------------------
-def call_llm(prompt: str) -> str:
-    if llm_provider == "Gemini (Cloud API)":
-        if not api_key:
-            raise ValueError("Gemini API キーが取得できませんでした。`01-private/gemini_api_key.txt` を配置してください。")
-        
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={api_key}"
-        payload = json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode("utf-8")
-        req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-        
-        with urllib.request.urlopen(req) as res:
-            res_data = json.loads(res.read().decode("utf-8"))
-            return res_data["candidates"][0]["content"]["parts"][0]["text"]
 
-    else:
-        url = f"{ollama_url.rstrip('/')}/api/generate"
-        payload = json.dumps({
-            "model": ollama_model,
-            "prompt": prompt,
-            "stream": False,
-            "options": {"keep_alive": "5m"}
-        }).encode("utf-8")
-        req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-        
-        with urllib.request.urlopen(req) as res:
-            res_data = json.loads(res.read().decode("utf-8"))
-            return res_data["response"]
 
-# ---------------------------------------------------------
-# ヘルパー関数: 00-rules / AGENTS.md に準拠したナレッジファイルのAI生成 (自動リレーション分析対応)
-# ---------------------------------------------------------
-def load_rule_docs() -> str:
-    rule_texts = []
-    target_rules = [
-        os.path.join(PROJECT_ROOT, "AGENTS.md"),
-        os.path.join(RULES_DIR, "formatting.md"),
-        os.path.join(RULES_DIR, "workflow.md"),
-        os.path.join(RULES_DIR, "agent-behavior.md")
-    ]
-    for rule_path in target_rules:
-        if os.path.exists(rule_path):
-            try:
-                rel_path = os.path.relpath(rule_path, PROJECT_ROOT)
-                with open(rule_path, "r", encoding="utf-8") as f:
-                    rule_texts.append("--- 【規約ファイル: " + rel_path + "】 ---\n" + f.read())
-            except Exception:
-                pass
-    return "\n\n".join(rule_texts)
 
-def get_existing_notes_context(category_filter: str = None) -> str:
-    """既存ノートのサマリー一覧を取得してプロンプト注入用に整形"""
-    existing_notes_summary = []
-    if os.path.exists(DB_PATH):
-        try:
-            conn = sqlite3.connect(DB_PATH)
-            cursor = conn.cursor()
-            if category_filter and category_filter != "すべて":
-                cursor.execute("SELECT title, rel_path, summary FROM knowledge_index WHERE category = ?", (category_filter,))
-            else:
-                cursor.execute("SELECT title, rel_path, summary FROM knowledge_index")
-            for t, rp, s in cursor.fetchall():
-                existing_notes_summary.append("- タイトル: " + str(t) + " (パス: " + str(rp) + ") / 概要: " + str(s))
-            conn.close()
-        except Exception:
-            pass
-    return "\n".join(existing_notes_summary) if existing_notes_summary else "（既存ノートなし）"
 
-def generate_knowledge_files(title: str, content: str, today: str, category: str = "default") -> dict:
-    """
-    formatting.md 規約に沿ったテキストをAIに直接出力させる。
-    既存ノートとの関連性（parent/children/related）も自動抽出する。
-    """
-    rules_context = load_rule_docs()
-    notes_context = get_existing_notes_context(category)
-    
-    prompt = "あなたはシステム内のナレッジ昇華を行なうAIエージェントです。\n" \
-             "以下の【関連規約ドキュメント】を厳格に遵守し、入力テキストから 02-knowledge/ 用のファイルを生成してください。\n\n" \
-             "【関連規約ドキュメント】\n" + rules_context + "\n\n---\n\n" \
-             "【既存ナレッジ一覧 (リレーション分析用)】\n" + notes_context + "\n\n---\n\n" \
-             "【本日日付】: " + today + "\n" \
-             "【対象カテゴリ】: " + category + "\n" \
-             "【処理対象タイトル】: " + title + "\n" \
-             "【処理対象内容】:\n" + content + "\n\n" \
-             "【出力指示】:\n" \
-             "1. formatting.md で定義されている「YAML Frontmatter」および「head & note の出力ルール」に厳格に従ってください。\n" \
-             "2. 【既存ナレッジ一覧】と照合し、関連性のあるノート（パスまたはノート名）を parent, children, related 配列に含めてください。\n" \
-             "3. 以下のJSONフォーマットのみで出力してください。余計な解説や思考プロセス、Markdownブロック記法(```)は含めないでください。\n\n" \
-             '{\n  "head_content": "--- Frontmatterのテキスト (parent/children/related を含む) ---",\n' \
-             '  "note_content": "--- Frontmatterのテキスト ---\\n\\n# タイトル\\n\\n本文"\n}\n'
-
-    try:
-        raw_text = call_llm(prompt)
-        json_match = re.search(r'\{.*\}', raw_text, re.DOTALL)
-        if json_match:
-            data = json.loads(json_match.group(0))
-            if "head_content" in data and "note_content" in data:
-                return data
-    except Exception as e:
-        st.warning(f"規約に基づくAIファイル生成でエラーが発生したため、標準フォーマットで作成します: {e}")
-        
-    clean_summary = content[:100].replace('\n', ' ')
-    default_fm = f"""---
-created: {today}
-updated: {today}
-tags: ["uncategorized"]
-status: draft
-phase: 1
-parent: []
-children: []
-related: []
-task: []
-summary: "{clean_summary}"
----"""
-    return {
-        "head_content": default_fm,
-        "note_content": f"{default_fm}\n\n# {title}\n\n{content}"
-    }
-
-def auto_sublimate_rag_answer(user_query: str, answer_text: str, custom_title: str, selected_cat: str, today: str) -> dict:
-    """RAGの回答からタイトル・カテゴリ・関連ノート(parent/children/related)を推察しナレッジを生成"""
-    notes_context = get_existing_notes_context()
-    rules_context = load_rule_docs()
-    title_val = custom_title if custom_title else "未指定"
-
-    prompt = "あなたはパーソナルナレッジベースのナレッジ昇華エージェントです。\n" \
-             "以下の【関連規約ドキュメント】を遵守し、ユーザーの質問とAIの回答からナレッジ（head/note）を生成してください。\n\n" \
-             "【関連規約ドキュメント】\n" + rules_context + "\n\n---\n\n" \
-             "【既存ナレッジ一覧 (リレーション参照用)】\n" + notes_context + "\n\n---\n\n" \
-             "【本日日付】: " + today + "\n" \
-             "【指定タイトル (空欄の場合は自動生成)】: " + title_val + "\n" \
-             "【指定カテゴリ (未指定の場合は自動推察)】: " + selected_cat + "\n" \
-             "【ユーザーの質問】: " + user_query + "\n" \
-             "【AIの回答内容】:\n" + answer_text + "\n\n" \
-             "【指示】:\n" \
-             "1. `custom_title` が空欄の場合、回答内容から適切な `kebab-case.md` のタイトル（拡張子なし）を生成してください。\n" \
-             "2. `selected_cat` が \"🤖 AIに自動推察させる\" または空欄の場合、回答内容から最適な英小文字のカテゴリ名（例: git, mac-settings, finance）を推察してください。\n" \
-             "3. 【既存ナレッジ一覧】の中から、本ナレッジと明確な親子・関連関係があるノートのパス（またはファイル名）を抽出して parent, children, related に配列形式で設定してください。\n" \
-             "4. formatting.md に完全準拠した JSON フォーマットのみで出力してください。\n\n" \
-             '{\n  "inferred_title": "推察されたタイトル",\n  "inferred_category": "推察されたカテゴリ名",\n' \
-             '  "head_content": "--- YAML Frontmatter (formatting.mdに準拠) ---",\n' \
-             '  "note_content": "--- YAML Frontmatter ---\\n\\n# タイトル\\n\\n本文"\n}\n'
-
-    try:
-        raw_text = call_llm(prompt)
-        json_match = re.search(r'\{.*\}', raw_text, re.DOTALL)
-        if json_match:
-            data = json.loads(json_match.group(0))
-            return data
-    except Exception as e:
-        st.error(f"ナレッジ昇華処理でエラーが発生しました: {e}")
-        
-    clean_title = custom_title if custom_title else f"rag-answer-{today}"
-    cat_name = "default" if selected_cat == "🤖 AIに自動推察させる" else selected_cat
-    # --- 修正ポイント：f文字列の外側であらかじめ置換しておく ---
-    short_summary = answer_text[:100].replace('\n', ' ')
-    default_fm = f"""---
-created: {today}
-updated: {today}
-tags: ["rag-generated"]
-status: draft
-phase: 1
-parent: []
-children: []
-related: []
-task: []
-summary: "{short_summary}"
----"""
-    return {
-        "inferred_title": clean_title,
-        "inferred_category": cat_name,
-        "head_content": default_fm,
-        "note_content": f"{default_fm}\n\n# {clean_title}\n\n{answer_text}"
-    }
 
 # ---------------------------------------------------------
 # WebUIメイン表示
