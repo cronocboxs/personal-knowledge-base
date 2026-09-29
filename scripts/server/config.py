@@ -24,16 +24,13 @@ EMBED_MODEL = "nomic-embed-text"
 DEFAULT_CONFIG = {
     "default_provider": "Ollama (Local LLM)",
     "gemini": {
-        "default_model": "gemini-2.5-flash",
+        "default_model": "gemini-3.5-flash-lite",
         "available_models": [
-            "gemini-2.5-flash",
-            "gemini-2.5-pro",
-            "gemini-1.5-flash",
-            "gemini-1.5-pro"
+            "gemini-3.5-flash-lite"
         ]
     },
     "ollama": {
-        "default_model": "qwen2.5:1.5b",
+        "default_model": "gemma4:e2b",
         "endpoint": "http://localhost:11434"
     }
 }
