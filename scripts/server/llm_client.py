@@ -37,7 +37,11 @@ def call_llm(
                     "model": ollama_model,
                     "prompt": prompt,
                     "stream": False,
-                    "options": {"keep_alive": "5m"}
+                    "options": {
+                        "keep_alive": "5m",
+                        "num_ctx": 64000,
+                        "num_predict": -1
+                    }
                 }).encode("utf-8")
                 req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
                 

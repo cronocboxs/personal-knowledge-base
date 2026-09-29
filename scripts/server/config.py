@@ -30,7 +30,7 @@ DEFAULT_CONFIG = {
         ]
     },
     "ollama": {
-        "default_model": "gemma4:e2b",
+        "default_model": "gemma4:e4b-it-q4_K_M",
         "endpoint": "http://localhost:11434"
     }
 }

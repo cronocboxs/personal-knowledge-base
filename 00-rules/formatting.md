@@ -16,6 +16,7 @@ AIエージェントがファイルを作成・更新する際は本規約に従
 ---
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
+source: [] # 一次素材への相対パス配列（例: ["04-resources/2026-09-29-src1.md"]）
 tags: [tag1, tag2]
 status: draft # draft | active | archived
 phase: 0 # 0:未着手 | 1:目録化 | 2:概要完了 | 3:一巡完了 | 4:最深部解読中 | 5:完全網羅
