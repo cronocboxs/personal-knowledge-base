@@ -5,8 +5,10 @@ import subprocess
 import streamlit as st
 from config import PROJECT_ROOT, KNOWLEDGE_DIR, RESOURCES_DIR, load_config, get_gemini_api_key
 from rag_service import search_relevant_knowledge
-from knowledge_service import generate_knowledge_files, auto_sublimate_rag_answer
+from knowledge_service import generate_knowledge_files, auto_sublimate_rag_answer, get_available_prompts
 from llm_client import call_llm
+
+# python3 -m streamlit run scripts/server/start-webui.py
 
 config = load_config()
 
@@ -85,8 +87,8 @@ llm_provider = st.sidebar.radio(
 )
 
 if llm_provider == "Gemini (Cloud API)":
-    gemini_models = config.get("gemini", {}).get("available_models", ["gemini-2.5-flash"])
-    default_gemini = config.get("gemini", {}).get("default_model", "gemini-2.5-flash")
+    gemini_models = config.get("gemini", {}).get("available_models", ["gemini-3.5-flash-lite"])
+    default_gemini = config.get("gemini", {}).get("default_model", "gemini-3.5-flash-lite")
     gemini_idx = gemini_models.index(default_gemini) if default_gemini in gemini_models else 0
     
     gemini_model = st.sidebar.selectbox(
@@ -103,7 +105,7 @@ if llm_provider == "Gemini (Cloud API)":
 
 else:
     available_ollama_models = get_ollama_models()
-    default_ollama = config.get("ollama", {}).get("default_model", "qwen2.5:1.5b")
+    default_ollama = config.get("ollama", {}).get("default_model", "gemma4:e2b")
     ollama_idx = available_ollama_models.index(default_ollama) if default_ollama in available_ollama_models else 0
     
     ollama_model = st.sidebar.selectbox(
@@ -213,11 +215,6 @@ st.sidebar.markdown("---")
 st.sidebar.subheader("📥 04-resources")
 render_explorer_tree(RESOURCES_DIR, is_knowledge=False)
 
-
-
-
-
-
 # ---------------------------------------------------------
 # WebUIメイン表示
 # ---------------------------------------------------------
@@ -247,22 +244,18 @@ with tab1:
     if "1." in input_type:
         subdir = st.text_input("保存先サブディレクトリ（任意）", value=st.session_state["form_subdir"], placeholder="例: server-logs や web-scraps (空欄で直下)")
     else:
+        # カテゴリ選択
         existing_categories = get_knowledge_categories()
         category_options = existing_categories + ["＋ 新規カテゴリ作成..."]
-        
         default_cat = st.session_state["form_category"]
         cat_idx = existing_categories.index(default_cat) if default_cat in existing_categories else 0
         
-        selected_cat = st.selectbox(
-            "ナレッジ保存先カテゴリ (02-knowledge/<カテゴリ>/)",
-            category_options,
-            index=cat_idx
-        )
-        
-        if selected_cat == "＋ 新規カテゴリ作成...":
-            repo_name = st.text_input("新規カテゴリ名（フォルダ名）", placeholder="例: system-architecture").strip()
-        else:
-            repo_name = selected_cat
+        selected_cat = st.selectbox("ナレッジ保存先カテゴリ (02-knowledge/<カテゴリ>/)", category_options, index=cat_idx, key="tab1_knowledge_category_select")
+        repo_name = st.text_input("新規カテゴリ名（フォルダ名）", placeholder="例: system-architecture").strip() if selected_cat == "＋ 新規カテゴリ作成..." else selected_cat
+
+        # 指示書テンプレートの選択ボックス（ユニークキー設定）
+        available_prompts = get_available_prompts()
+        selected_prompt = st.selectbox("使用する指示書（プロンプトテンプレート）", available_prompts, key="tab1_sublimation_prompt_select")
 
     content = st.text_area("本文・状況の詳細", value=st.session_state["form_content"], height=250)
     
@@ -303,8 +296,19 @@ with tab1:
                     note_path = os.path.join(note_dir, base_filename)
                     
                     selected_model_name = gemini_model if llm_provider == "Gemini (Cloud API)" else ollama_model
-                    with st.spinner(f"2. [{selected_model_name}] が 既存ノートとの関連(parent/children/related)を自動分析して昇華中..."):
-                        generated_data = generate_knowledge_files(title, content, today, category=repo_name)
+                    with st.spinner(f"2. [{selected_model_name}] が 指示書 ({selected_prompt}) に従って解析昇華中..."):
+                        generated_data = generate_knowledge_files(
+                            title=title,
+                            content=content,
+                            today=today,
+                            category=repo_name,
+                            prompt_filename=selected_prompt,
+                            llm_provider=llm_provider,
+                            gemini_model=gemini_model if llm_provider == "Gemini (Cloud API)" else "",
+                            api_key=get_gemini_api_key(),
+                            ollama_model=ollama_model if llm_provider != "Gemini (Cloud API)" else "",
+                            ollama_url=ollama_url if llm_provider != "Gemini (Cloud API)" else ""
+                        )
                         
                         with open(head_path, "w", encoding="utf-8") as f:
                             f.write(generated_data["head_content"].strip() + "\n")
@@ -388,7 +392,14 @@ with tab2:
 """
             with st.spinner(f"🤖 [{selected_model_name}] が回答を生成中..."):
                 try:
-                    answer = call_llm(rag_prompt)
+                    answer = call_llm(
+                        prompt=rag_prompt,
+                        llm_provider=llm_provider,
+                        gemini_model=gemini_model if llm_provider == "Gemini (Cloud API)" else "",
+                        api_key=get_gemini_api_key(),
+                        ollama_model=ollama_model if llm_provider != "Gemini (Cloud API)" else "",
+                        ollama_url=ollama_url if llm_provider != "Gemini (Cloud API)" else ""
+                    )
                     st.session_state["last_rag_answer"] = answer
                     st.session_state["last_rag_query"] = user_query
                 except Exception as e:
@@ -407,7 +418,7 @@ with tab2:
             save_title = st.text_input("保存用タイトル (任意 / 空欄でAI自動生成)", placeholder="例: macbook-llm-setup-guide")
             
             sublimate_categories = ["🤖 AIに自動推察させる"] + get_knowledge_categories() + ["＋ 新規カテゴリ作成..."]
-            save_cat_choice = st.selectbox("保存先カテゴリ", sublimate_categories)
+            save_cat_choice = st.selectbox("保存先カテゴリ", sublimate_categories, key="rag_save_category_select")
             
             if save_cat_choice == "＋ 新規カテゴリ作成...":
                 target_cat_name = st.text_input("新規作成するカテゴリ名", placeholder="例: mac-settings").strip()
@@ -423,7 +434,12 @@ with tab2:
                         answer_text=st.session_state["last_rag_answer"],
                         custom_title=save_title.strip(),
                         selected_cat=target_cat_name,
-                        today=today
+                        today=today,
+                        llm_provider=llm_provider,
+                        gemini_model=gemini_model if llm_provider == "Gemini (Cloud API)" else "",
+                        api_key=get_gemini_api_key(),
+                        ollama_model=ollama_model if llm_provider != "Gemini (Cloud API)" else "",
+                        ollama_url=ollama_url if llm_provider != "Gemini (Cloud API)" else ""
                     )
                     
                     final_title = res.get("inferred_title", f"rag-answer-{today}").replace(".md", "").strip().lower().replace(" ", "-")
