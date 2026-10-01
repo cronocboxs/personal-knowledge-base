@@ -1,0 +1,13 @@
+{
+  "default_provider": "Ollama (Local LLM)",
+  "gemini": {
+    "default_model": "gemini-3.5-flash-lite",
+    "available_models": [
+      "gemini-3.5-flash-lite"
+    ]
+  },
+  "ollama": {
+    "default_model": "gemma4:e4b-it-q4_K_M",
+    "endpoint": "http://localhost:11434"
+  }
+}
