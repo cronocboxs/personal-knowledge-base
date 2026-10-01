@@ -80,5 +80,6 @@ Temporary Items
 # 実行ログ・API消費集計ログ
 04-resources/logs/
 tmp/*
+scripts/server/__pycache__/*
 !*/README.md
 !*/.gitkeep
