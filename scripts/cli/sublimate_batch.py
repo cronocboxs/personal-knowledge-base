@@ -24,10 +24,10 @@ def is_text_file(filepath: str) -> bool:
     except (UnicodeDecodeError, Exception):
         return False
 
-def get_target_resources(target_input: str) -> list[str]:
+def get_target_resources(target_input: str, force: bool = False) -> list[str]:
     """
     指定されたターゲット（ファイルまたはディレクトリ）から処理対象のファイル一覧を取得
-    未昇華チェックも合わせて行う
+    force=False の場合は未昇華チェックを行い、force=True の場合は全件を再昇華対象とする
     """
     abs_target = os.path.abspath(target_input)
     if not os.path.exists(abs_target):
@@ -55,6 +55,11 @@ def get_target_resources(target_input: str) -> list[str]:
         rel_path = os.path.relpath(file_path, PROJECT_ROOT)
         base_name = os.path.basename(file_path)
         
+        # 強制再処理(--force)が指定されている場合は重複判定をスキップ
+        if force:
+            unprocessed.append(rel_path)
+            continue
+
         # 保存時のMarkdownファイル名を想定 (例: script.py -> script.py.md)
         kb_base_name = base_name if base_name.endswith(".md") else f"{base_name}.md"
         
@@ -92,14 +97,11 @@ def main():
   # 1. 04-resources/ 全体を対象に自動昇華（デフォルト）
   python3 scripts/cli/sublimate_batch.py
 
-  # 2. 特定ディレクトリ配下のファイル（コードやテキスト含む）を一括昇華
-  python3 scripts/cli/sublimate_batch.py -t 04-resources/system-logs
+  # 2. 既存ノートが存在していても強制的に再解析・上書き更新 (--force)
+  python3 scripts/cli/sublimate_batch.py -t scripts/server/ -f
 
-  # 3. 単一のファイルを Gemini で昇華
-  python3 scripts/cli/sublimate_batch.py -t 04-resources/app.py -p "Gemini (Cloud API)" -m "gemini-3.5-flash-lite"
-
-  # 4. 指示書（スキル）とカテゴリを指定して昇華
-  python3 scripts/cli/sublimate_batch.py -i sublimation-agent -c "system-architecture"
+  # 3. 単一のファイルを Gemini で再昇華
+  python3 scripts/cli/sublimate_batch.py -t scripts/server/start-webui.py -p "Gemini (Cloud API)" -f
 """
     )
     
@@ -108,6 +110,11 @@ def main():
         default=RESOURCES_DIR,
         metavar="PATH",
         help="解析対象のファイルパスまたはディレクトリパス (デフォルト: 04-resources/)"
+    )
+    parser.add_argument(
+        "-f", "--force",
+        action="store_true",
+        help="昇華済みノートが存在する場合でも強制的に再昇華（上書き）します"
     )
     parser.add_argument(
         "-i", "--instruction",
@@ -146,13 +153,14 @@ def main():
     api_key = get_gemini_api_key()
     ollama_url = config.get("ollama", {}).get("endpoint", "http://localhost:11434")
 
-    unprocessed = get_target_resources(args.target)
+    unprocessed = get_target_resources(args.target, force=args.force)
     if not unprocessed:
         print(f"✨ 指定対象 [{args.target}] 内に未処理の一次素材はありません。")
         return
 
-    print(f"🚀 {len(unprocessed)} 件の未昇華一次素材を検出しました。昇華処理を開始します...")
+    print(f"🚀 {len(unprocessed)} 件の一次素材を検出しました。昇華処理を開始します...")
     print(f"  ・対象パス  : {args.target}")
+    print(f"  ・強制再昇華: {'有効 (-f)' if args.force else '無効'}")
     print(f"  ・指示書    : {args.instruction}")
     print(f"  ・プロバイダ: {args.provider}")
     print(f"  ・モデル    : {args.model}")
