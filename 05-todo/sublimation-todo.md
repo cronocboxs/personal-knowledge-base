@@ -1,3 +1,3 @@
-# Sublimation Todo: scripts/server/start-webui.py
+# Sublimation Todo List
 
 - [x] scripts/server/start-webui.py
