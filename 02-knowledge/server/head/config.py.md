@@ -2,12 +2,12 @@
 created: 2026-10-06
 updated: 2026-10-06
 source: ["scripts/server/config.py"]
-tags: [server, config, python]
+tags: [server, config, python, environment]
 status: active
-phase: 3
+phase: 5
 parent: []
 children: []
-related: ["scripts/server/settings.json"]
-task: ["scripts/server/config.py # サーバ設定・パス管理スクリプトの静的解析"]
-summary: "プロジェクト共通のパス定義、設定ファイルの読み込み、およびGemini APIキー取得のヘルパー関数を提供する設定モジュール。"
+related: ["scripts/server/settings.json", "scripts/server/start-webui.py", "scripts/server/rag_service.py", "scripts/server/knowledge_service.py", "scripts/server/llm_client.py"]
+task: ["scripts/server/config.py # 設定・パス定義スクリプトの静的解析"]
+summary: "scripts/server/config.py はプロジェクトルートや各種データベース・設定ファイルのパスを定義し、デフォルト設定のロードやAPIキーの取得ヘルパーを提供する設定モジュールです。"
 ---
