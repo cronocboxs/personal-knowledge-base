@@ -1,52 +1,49 @@
 ---
 created: 2026-10-06
 updated: 2026-10-06
-source: ["04-resources/scripts/server/config.py"]
-tags: [server, config, python, settings]
+source: ["scripts/server/config.py"]
+tags: [server, config, python]
 status: active
-phase: 5
+phase: 3
 parent: []
 children: []
-related: ["scripts/server/settings.json", "scripts/server/llm_client.py"]
-task: ["scripts/server/config.py"]
-summary: "scripts/server/config.py は、パス定義、設定ファイルの読み込み、Gemini APIキーの取得などサーバー側の設定管理を担当します。"
+related: ["scripts/server/settings.json"]
+task: ["scripts/server/config.py # サーバ設定・パス管理スクリプトの静的解析"]
+summary: "プロジェクト共通のパス定義、設定ファイルの読み込み、およびGemini APIキー取得のヘルパー関数を提供する設定モジュール。"
 ---
 
 # `scripts/server/config.py` 解析ノート
 
 ## 1. 概要
-`scripts/server/config.py` は、パーソナルナレッジベースのサーバーサイド機能（WebUIやバックエンドサービス）における基本設定、パス定義、設定ファイル読込、および外部APIキーの管理を行う設定モジュールです。
+`scripts/server/config.py` は、パーソナルナレッジベースサーバ群（`scripts/server/`）において、プロジェクトルートの絶対パス算出、各種データ・ルール・リソースディレクトリのパス定義、`settings.json` の自動生成・読み込み、および環境変数やプライベートファイルからの Gemini API キー取得を行う共通設定モジュールです。
 
-## 2. 主要な変数とパス定義
-- **`SCRIPT_DIR`**: スクリプトが存在するディレクトリ (`scripts/server/`) の絶対パス。
-- **`PROJECT_ROOT`**: プロジェクトルートディレクトリの絶対パス（`scripts/server/` から2階層上）。
-- **`CONFIG_PATH`**: `settings.json` の絶対パス。
-- **`PRIVATE_DIR`**: `01-private` ディレクトリの絶対パス。
-- **`RULES_DIR`**: `00-rules` ディレクトリの絶対パス。
-- **`RESOURCES_DIR`**: `04-resources` ディレクトリの絶対パス。
-- **`KNOWLEDGE_DIR`**: `02-knowledge` ディレクトリの絶対パス。
-- **`DB_PATH`**: SQLiteのナレッジインデックスDB (`01-private/knowledge_index.db`) のパス。
-- **`OLLAMA_ENDPOINT`**: Ollamaのデフォルトエンドポイント (`http://localhost:11434`)。
-- **`EMBED_MODEL`**: 埋め込みモデル名 (`nomic-embed-text`)。
+## 2. 主要な定数・パス定義
+- `SCRIPT_DIR`: スクリプト自身の配置ディレクトリ絶対パス (`scripts/server/`)
+- `PROJECT_ROOT`: リポジトリルートの絶対パス (`../../` 経由)
+- `CONFIG_PATH`: `settings.json` の絶対パス
+- `PRIVATE_DIR`: `01-private/` の絶対パス
+- `RULES_DIR`: `00-rules/` の絶対パス
+- `RESOURCES_DIR`: `04-resources/` の絶対パス
+- `KNOWLEDGE_DIR`: `02-knowledge/` の絶対パス
+- `DB_PATH`: `01-private/knowledge_index.db` の絶対パス
+- `OLLAMA_ENDPOINT`: Ollama ローカルエンドポイント (`http://localhost:11434`)
+- `EMBED_MODEL`: 埋め込みモデル名 (`nomic-embed-text`)
 
-## 3. 主要関数
+## 3. 関数・主要処理フロー
 
 ### `load_config() -> dict`
-- **目的**: サーバー設定ファイル (`settings.json`) を読み込む。存在しない場合はデフォルト設定 (`DEFAULT_CONFIG`) を書き込んでそれを返す。
-- **デフォルト設定内容**:
-  - `default_provider`: "Ollama (Local LLM)"
-  - `gemini`: デフォルトモデル等の設定
-  - `ollama`: デフォルトモデル (`gemma4:e4b-it-q4_K_M`) とエンドポイント
+1. `settings.json`（`CONFIG_PATH`）の存在を確認する。
+2. 存在する場合は JSON として読み込んで返す。失敗した場合はデフォルト設定にフォールバックする。
+3. 存在しない場合は `DEFAULT_CONFIG` をファイルに書き込み、初期設定を生成した上で返す。
 
 ### `get_gemini_api_key() -> str`
-- **目的**: Gemini API キーを取得する。
-- **探索順序**:
-  1. `01-private/gemini_api_key.txt`
-  2. `01-private/gemini-api-key`
-  3. `01-private/api_key.txt`
-  4. 環境変数 `GEMINI_API_KEY`
-- 見つかった最初の有効なキー文字列をトリムして返す。
+1. 以下のプライベートディレクトリ内の候補ファイルから API キーの読み込みを試みる:
+   - `01-private/gemini_api_key.txt`
+   - `01-private/gemini-api-key`
+   - `01-private/api_key.txt`
+2. ファイルが見つからない、または空の場合は環境変数 `GEMINI_API_KEY` を参照する。
+3. 有効な文字列が得られればそれを返す。
 
-## 4. 依存関係・連携
-- `settings.json`: 設定の永続化先。
-- `llm_client.py` や各種サービス (`rag_service.py`, `knowledge_service.py`) からインポートされ、設定やパスの基準として利用される。
+## 4. 依存関係
+- 外部モジュール: `os`, `json`
+- 関連ファイル: `scripts/server/settings.json`

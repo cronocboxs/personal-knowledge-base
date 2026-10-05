@@ -1,13 +1,13 @@
 ---
 created: 2026-10-06
 updated: 2026-10-06
-source: ["04-resources/scripts/server/config.py"]
-tags: [server, config, python, settings]
+source: ["scripts/server/config.py"]
+tags: [server, config, python]
 status: active
-phase: 5
+phase: 3
 parent: []
 children: []
-related: ["scripts/server/settings.json", "scripts/server/llm_client.py"]
-task: ["scripts/server/config.py"]
-summary: "scripts/server/config.py は、パス定義、設定ファイルの読み込み、Gemini APIキーの取得などサーバー側の設定管理を担当します。"
+related: ["scripts/server/settings.json"]
+task: ["scripts/server/config.py # サーバ設定・パス管理スクリプトの静的解析"]
+summary: "プロジェクト共通のパス定義、設定ファイルの読み込み、およびGemini APIキー取得のヘルパー関数を提供する設定モジュール。"
 ---
