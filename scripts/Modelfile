@@ -1,0 +1,10 @@
+FROM gemma4:e4b-it-q4_K_M
+
+# コンテキストウィンドウ（最大トークン数）を 64,000 に設定
+PARAMETER num_ctx 64000
+
+# 出力トークン数を無制限（モデルの最大値まで）に設定
+PARAMETER num_predict -1
+
+# ツール呼び出し時の誤作動・揺らぎを最小化する
+PARAMETER temperature 0.1
