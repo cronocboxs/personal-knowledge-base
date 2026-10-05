@@ -1,51 +1,43 @@
 ---
 created: 2026-10-06
 updated: 2026-10-06
-source: ["scripts/server/knowledge_service.py"]
-tags: [server, knowledge, service, ollama, gemini, python]
+source: ["04-resources/scripts/server/knowledge_service.py"]
+tags: [server, knowledge, service, python]
 status: active
-phase: 5
+phase: 3
 parent: []
 children: []
 related: ["scripts/server/config.py", "scripts/server/llm_client.py"]
-task: ["scripts/server/knowledge_service.py # scripts/server/knowledge_service.pyの静的解析完了"]
-summary: "プロンプトテンプレートの解決、規約読み込み、LLMを用いた二層ナレッジ生成（メタデータ・本文抽出）、およびRAG回答の自動昇華を行うサービスモジュール。"
+task: ["scripts/server/knowledge_service.py"]
+summary: "scripts/server/knowledge_service.pyの静的解析ノート（本文付き）"
 ---
 
-# knowledge_service.py 解析ノート
+# `scripts/server/knowledge_service.py` 解析ノート
 
-## 1. 概要
-`knowledge_service.py` は、パーソナルナレッジベースの中核となるナレッジ生成・昇華ロジックを提供するサービスモジュールです。プロンプトテンプレートの解決、規約ドキュメント（`AGENTS.md` や `00-rules/`）の動的読み込み、LLM を活用した 2 パス（メタデータ抽出 ＋ 本文解析生成）による二層ノート（`head` および `note`）の生成、さらに RAG の質問・回答結果の自動昇華機能を担当します。
+## 1. 概要・責務
+`scripts/server/knowledge_service.py` は、パーソナルナレッジベースにおけるナレッジ生成・昇華処理を担うサービスモジュールです。プロンプトや規約ドキュメントの解決・読み込み、既存ナレッジコンテキストの SQLite からの取得、LLM出力のJSONパース補正、二層構造（`head/` および `note/`）のメタデータ・本文生成処理を提供します。
 
-## 2. 依存関係
-- **インポートモジュール**: `os`, `re`, `json`, `sqlite3`, `pathlib.Path`, `streamlit as st`
-- **内部モジュール・設定依存**: `config.py` (`PROJECT_ROOT`, `RULES_DIR`, `KNOWLEDGE_DIR`, `DB_PATH`), `llm_client.py` (`call_llm`)
-
-## 3. 主要関数・処理フロー
-
+## 2. 主要な関数・処理フロー
 ### `resolve_prompt_path(prompt_input: str) -> str`
-- **目的**: 指定された指示書名やパス（例: `code-analysis.md`, `sublimation-agent`）を、リポジトリ内の適切な絶対パス（`00-rules/prompts/` や `.agents/skills/` 等）に解決する。
+- 指定されたプロンプト名やパスを、`00-rules/prompts/` や `.agents/skills/` などの実際の絶対パスへと解決します。
 
 ### `get_available_prompts() -> list[str]`
-- **目的**: `00-rules/prompts/` 配下に格納されている利用可能なプロンプトテンプレートのファイル名一覧を取得する。
+- `00-rules/prompts/` 配下に存在する `.md` ファイルの一覧を取得して返します。
 
 ### `load_rule_docs() -> str`
-- **目的**: `AGENTS.md` や `00-rules/formatting.md` などの主要な規約ファイルを読み込み、LLMのシステムプロンプトやコンテキストとして注入可能な文字列として結合する。
+- リポジトリ直下の `AGENTS.md` および `00-rules/` 配下の主要規約ファイル群を読み込み、コンテキストとして結合します。
 
 ### `get_existing_notes_context(category_filter: str = None) -> str`
-- **目的**: SQLite ベクトルデータベース (`DB_PATH`) から既存のノートタイトル・パス・概要のリストを取得し、リレーション（`parent`, `children`, `related`）参照用のコンテキストを作成する。
+- SQLite データベース (`01-private/knowledge_index.db`) から既存のナレッジ一覧（タイトル、パス、概要）を取得し、文字列コンテキストとしてまとめます。
 
 ### `clean_and_parse_json(json_str: str) -> dict`
-- **目的**: LLM が出力した JSON 文字列のエスケープミスや不正な記法を補正し、安全に `json.loads` でパースする。
+- LLMが生成した不正なエスケープ文字を含む JSON 文字列をクレンジングし、安全にパースします。
 
 ### `generate_knowledge_files(...) -> dict`
-- **目的**: 入力データとタイトルをもとに、規約に完全に準拠した二層ナレッジファイルを生成する。
-- **処理フロー**:
-  1. 規約ドキュメントと既存ノート情報を読み込み。
-  2. **PASS 1**: LLM を用いてカテゴリ・タグ・概要・リレーションを JSON 形式で抽出（または自動推察）。
-  3. 規約に準拠した YAML Frontmatter テキストを構築。
-  4. **PASS 2**: 選択された指示書テンプレートに則り、LLM に本文解析をさせてMarkdown文書を生成。
-  5. `head_content`（Frontmatterのみ）と `note_content`（Frontmatter ＋ 本文）を含む辞書を返す。
+1. 規約と既存ノートのコンテキストをロード。
+2. **PASS 1**: LLMを用いてカテゴリ・メタデータ（tags, summary, related等）を JSON 形式で抽出。
+3. **PASS 2**: 選択された指示書テンプレートに基づいて、本文の解説 Markdown を生成。
+4. 二層構造（head と note）のコンテンツを辞書形式で返却します。
 
 ### `auto_sublimate_rag_answer(...) -> dict`
-- **目的**: RAG で生成されたユーザーの質問と回答のペアから、タイトル、カテゴリ、概要、リレーションを自動抽出・推察し、ナレッジノートとしての二層コンテンツを構築して返す。
+- RAGのQ&Aセッションの結果から、自動的にナレッジノートのタイトル、カテゴリ、メタデータおよびノート本文を生成・構造化します。
