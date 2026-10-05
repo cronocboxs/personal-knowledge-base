@@ -15,22 +15,34 @@ summary: "scripts/server/config.py はプロジェクトルートや各種デー
 # `scripts/server/config.py` 解析ノート
 
 ## 1. 概要
-`scripts/server/config.py` は、パーソナルナレッジベースサーバー側の各種設定や絶対パスの定義、および外部設定ファイル (`settings.json`) の読み込み・デフォルト生成を行う中心的な設定モジュールです。
+`scripts/server/config.py` は、パーソナルナレッジベースサーバーサイド群の共通設定およびパス定義を行うPythonモジュールです。プロジェクトルートの自動検出、各種ディレクトリ（`01-private`, `00-rules`, `04-resources`, `02-knowledge`）のパス解決、設定ファイル（`settings.json`）の読み込み・初期化、および外部APIキーの安全な取得を行います。
 
-## 2. 主要なパス定義
-- **`SCRIPT_DIR`**: スクリプトの存在ディレクトリ (`scripts/server/`)
-- **`PROJECT_ROOT`**: プロジェクトのルートディレクトリ (`scripts/server/` から2階層上)
-- **`CONFIG_PATH`**: 設定ファイルパス (`settings.json`)
-- **`PRIVATE_DIR`**: 非公開情報ディレクトリ (`01-private`)
-- **`RULES_DIR`**: 規約ディレクトリ (`00-rules`)
-- **`RESOURCES_DIR`**: 一次資源ディレクトリ (`04-resources`)
-- **`KNOWLEDGE_DIR`**: ナレッジディレクトリ (`02-knowledge`)
-- **`DB_PATH`**: SQLite インデックスDB (`01-private/knowledge_index.db`)
-- **Ollama 設定**: `OLLAMA_ENDPOINT` ("http://localhost:11434"), `EMBED_MODEL` ("nomic-embed-text")
+## 2. 主要な変数と定数
 
-## 3. 主要関数
-- **`load_config() -> dict`**:
-  - `settings.json` が存在する場合は `json.load` で読み込んで返す。
-  - 存在しない場合は `DEFAULT_CONFIG`（GeminiやOllamaのデフォルトモデル設定）を `settings.json` に書き出して返す。
-- **`get_gemini_api_key() -> str`**:
-  - `01-private/` 配下の候補ファイル群 (`gemini_api_key.txt`, `gemini-api-key`, `api_key.txt`) や環境変数 (`GEMINI_API_KEY`) からAPIキーを安全に取得・返却する。
+- **`SCRIPT_DIR`**: 現在のスクリプト（`scripts/server/`）の絶対パス。
+- **`PROJECT_ROOT`**: プロジェクトルート（`SCRIPT_DIR` から2階層上）の絶対パス。
+- **`CONFIG_PATH`**: 設定ファイルパス（`settings.json`）。
+- **`PRIVATE_DIR`**: プライベートデータ格納ディレクトリ（`01-private`）。
+- **`RULES_DIR`**: ルールディレクトリ（`00-rules`）。
+- **`RESOURCES_DIR`**: リソースディレクトリ（`04-resources`）。
+- **`KNOWLEDGE_DIR`**: ナレッジディレクトリ（`02-knowledge`）。
+- **`DB_PATH`**: SQLite インデックスデータベースのパス（`01-private/knowledge_index.db`）。
+- **`OLLAMA_ENDPOINT`**: ローカルOllamaエンドポイント（デフォルト: `http://localhost:11434`）。
+- **`EMBED_MODEL`**: 埋め込みモデル名（デフォルト: `nomic-embed-text`）。
+
+## 3. 主要な関数
+
+### `load_config() -> dict`
+- **目的**: `settings.json` から設定を読み込む。ファイルが存在しない場合や破損している場合は、`DEFAULT_CONFIG` をファイルに書き込んでデフォルト値を返します。
+
+### `get_gemini_api_key() -> str`
+- **目的**: Gemini API キーを取得する。
+- **検索順序**:
+  1. `01-private/gemini_api_key.txt`
+  2. `01-private/gemini-api-key`
+  3. `01-private/api_key.txt`
+  4. 環境変数 `GEMINI_API_KEY`
+
+## 4. 依存関係
+- 標準ライブラリ: `os`, `json`
+- 関連ファイル: `scripts/server/settings.json`, `scripts/server/start-webui.py`, `scripts/server/rag_service.py`, `scripts/server/knowledge_service.py`, `scripts/server/llm_client.py`

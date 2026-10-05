@@ -2,12 +2,12 @@
 created: 2026-10-06
 updated: 2026-10-06
 source: ["scripts/server/start-webui.md"]
-tags: [server, webui, streamlit, documentation]
+tags: [server, webui, documentation, streamlit, python]
 status: active
 phase: 5
 parent: []
 children: []
-related: ["scripts/server/start-webui.py"]
-task: ["scripts/server/start-webui.md # WebUI使用ガイドドキュメントの静的解析"]
-summary: "scripts/server/start-webui.md は、Streamlit WebUIの起動方法や04-resourcesから02-knowledgeへの自動昇華パイプラインの仕様を解説したドキュメントです。"
+related: ["scripts/server/start-webui.py", "scripts/server/config.py", "scripts/server/rag_service.py", "scripts/server/knowledge_service.py", "scripts/server/llm_client.py"]
+task: ["scripts/server/start-webui.md # WebUI起動手順・仕様ドキュメントの静的解析"]
+summary: "scripts/server/start-webui.md は Streamlit WebUI の起動コマンド、必要パッケージ、一次データ保存とAI自動昇華パイプラインの仕様を解説するドキュメントです。"
 ---
