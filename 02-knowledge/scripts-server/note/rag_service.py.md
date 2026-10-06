@@ -1,30 +1,101 @@
 ---
-created: 2026-10-06
-updated: 2026-10-06
-source: ["scripts/server/rag_service.py"]
-tags: ["scripts", "server", "rag", "search"]
-status: active
-phase: 2
-parent: []
-children: []
-related: ["scripts/server/config.py"]
-task: []
-summary: "scripts/server/rag_service.py の静的解析ノート"
+title: "scripts/server/rag_service.py Note"
+date: 2026-10-06
+tags: [server, rag_service]
+category: scripts-server
+description: "RAG検索・処理サービスの詳細解析"
 ---
 
-# `scripts/server/rag_service.py` 解析ノート
+# Note: scripts/server/rag_service.py
 
-## 概要
-`scripts/server/rag_service.py` は、パーソナルナレッジベースにおける RAG（Retrieval-Augmented Generation）のコアロジック（ベクトル埋め込み生成、コサイン類似度計算、SQLite データベースからの類似度検索）を提供するモジュールです。
+## 1. 目的と役割
+本ファイル `rag_service.py` は `RAG検索・処理サービス` として動作し、システム全体の中で重要な役割を果たします。
 
-## 主な関数と処理フロー
-### 1. `get_query_embedding(text: str) -> list[float]`
-- Ollama の埋め込み API (`/api/embeddings`) を呼び出し、入力テキスト（質問文など）のベクトル表現（埋め込み）を取得します。
+## 2. 主要な構成要素・処理フロー
+- ファイル種別: `py`
+- 責務: RAG検索・処理サービス
 
-### 2. `cosine_similarity(v1: list[float], v2: list[float]) -> float`
-- 2つのベクトル間のコサイン類似度を計算します。
+## 3. コード内容 / 構成
+```
+import os
+import sqlite3
+import math
+import json
+import urllib.request
+from config import DB_PATH, OLLAMA_ENDPOINT, EMBED_MODEL
 
-### 3. `search_relevant_knowledge(query: str, top_k: int = 3, target_categories: list[str] = None) -> list[dict]`
-- SQLite データベース (`01-private/knowledge_index.db`) に接続します。
-- 必要に応じてカテゴリフィルタを適用し、ナレッジのタイトル、概要、本文、ベクトルを取得します。
-- クエリのベクトルと各ドキュメントのベクトル間でコサイン類似度を計算し、スコアが高い順にソートして上位 `top_k` 件のドキュメント情報を返します。
+# ---------------------------------------------------------
+# RAG ヘルパー関数: ベクトル計算 & SQLite 類似度検索
+# ---------------------------------------------------------
+def get_query_embedding(text: str) -> list[float]:
+    url = f"{OLLAMA_ENDPOINT.rstrip('/')}/api/embeddings"
+    payload = json.dumps({
+        "model": EMBED_MODEL,
+        "prompt": text
+    }).encode("utf-8")
+    
+    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req) as res:
+            res_data = json.loads(res.read().decode("utf-8"))
+            return res_data.get("embedding", [])
+    except Exception as e:
+        st.error(f"⚠️ 質問文のベクトル変換エラー (Ollamaが稼働しているか確認してください): {e}")
+        return []
+
+def cosine_similarity(v1: list[float], v2: list[float]) -> float:
+    if not v1 or not v2 or len(v1) != len(v2):
+        return 0.0
+    dot_product = sum(a * b for a, b in zip(v1, v2))
+    norm_v1 = math.sqrt(sum(a * a for a in v1))
+    norm_v2 = math.sqrt(sum(b * b for b in v2))
+    if norm_v1 == 0 or norm_v2 == 0:
+        return 0.0
+    return dot_product / (norm_v1 * norm_v2)
+
+def search_relevant_knowledge(query: str, top_k: int = 3, target_categories: list[str] = None) -> list[dict]:
+    if not os.path.exists(DB_PATH):
+        return []
+
+    query_vec = get_query_embedding(query)
+    if not query_vec:
+        return []
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    if target_categories and "すべて" not in target_categories:
+        placeholders = ','.join(['?'] * len(target_categories))
+        sql = f"SELECT rel_path, category, title, summary, content, embedding FROM knowledge_index WHERE category IN ({placeholders})"
+        cursor.execute(sql, target_categories)
+    else:
+        cursor.execute("SELECT rel_path, category, title, summary, content, embedding FROM knowledge_index")
+        
+    rows = cursor.fetchall()
+    conn.close()
+
+    results = []
+    for rel_path, category, title, summary, content, emb_str in rows:
+        if not emb_str:
+            continue
+        try:
+            doc_vec = json.loads(emb_str)
+            score = cosine_similarity(query_vec, doc_vec)
+            results.append({
+                "rel_path": rel_path,
+                "category": category,
+                "title": title,
+                "summary": summary,
+                "content": content,
+                "score": score
+            })
+        except Exception:
+            pass
+
+    results.sort(key=lambda x: x["score"], reverse=True)
+    return results[:top_k]
+
+```
+
+## 4. 依存関係と連携
+- `scripts/server/` 内の他のモジュールとの連携。

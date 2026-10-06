@@ -1,27 +1,37 @@
 ---
-created: 2026-10-06
-updated: 2026-10-06
-source: ["scripts/server/settings.json"]
-tags: [server, config, json, settings]
-status: active
-phase: 2
-parent: []
-children: []
-related: ["scripts/server/config.py"]
-task: ["scripts/server/settings.json # サーバー設定JSONファイルの解析"]
-summary: "LLMプロバイダーやデフォルトモデル（Gemini / Ollama）の設定を保持するJSON設定ファイル。"
+title: "scripts/server/settings.json Note"
+date: 2026-10-06
+tags: [server, settings]
+category: scripts-server
+description: "サーバー設定JSONファイルの詳細解析"
 ---
 
-# settings.json - サーバー設定ファイル
+# Note: scripts/server/settings.json
 
-## 概要
-`scripts/server/settings.json` は、ナレッジベースサーバーにおけるデフォルトのLLMプロバイダー、および各プロバイダー（Gemini, Ollama）の利用モデルやエンドポイントを定義するJSONファイルです。
+## 1. 目的と役割
+本ファイル `settings.json` は `サーバー設定JSONファイル` として動作し、システム全体の中で重要な役割を果たします。
 
-## 構造
-- `default_provider`: デフォルトで使用するLLMプロバイダー（例: `"Ollama (Local LLM)"`）
-- `gemini`: Google Gemini APIの設定
-  - `default_model`: デフォルトモデル (`"gemini-3.5-flash-lite"`)
-  - `available_models`: 利用可能なモデルリスト
-- `ollama`: ローカルOllamaの設定
-  - `default_model`: デフォルトモデル (`"gemma4-agent"` など)
-  - `endpoint`: Ollama APIエンドポイント (`"http://localhost:11434"`)
+## 2. 主要な構成要素・処理フロー
+- ファイル種別: `json`
+- 責務: サーバー設定JSONファイル
+
+## 3. コード内容 / 構成
+```
+{
+  "default_provider": "Ollama (Local LLM)",
+  "gemini": {
+    "default_model": "gemini-3.5-flash-lite",
+    "available_models": [
+      "gemini-3.5-flash-lite"
+    ]
+  },
+  "ollama": {
+    "default_model": "gemma4-agent",
+    "endpoint": "http://localhost:11434"
+  }
+}
+
+```
+
+## 4. 依存関係と連携
+- `scripts/server/` 内の他のモジュールとの連携。

@@ -1,47 +1,91 @@
 ---
-created: 2026-10-06
-updated: 2026-10-06
-source: ["scripts/server/config.py"]
-tags: [server, config, python, settings]
-status: active
-phase: 2
-parent: []
-children: []
-related: ["scripts/server/settings.json"]
-task: ["scripts/server/config.py # scripts/server/config.pyの静的解析・設定管理仕様ノート"]
-summary: "scripts/server/config.py は、プロジェクトルートのパス定義、settings.jsonからの設定読み込み、およびGemini APIキーの取得を担当する設定管理モジュールです。"
+title: "scripts/server/config.py Note"
+date: 2026-10-06
+tags: [server, config]
+category: scripts-server
+description: "サーバー設定管理モジュールの詳細解析"
 ---
 
-# config.py 解析ノート
+# Note: scripts/server/config.py
 
-## 1. 概要
-`scripts/server/config.py` は、パーソナルナレッジベース内のサーバーサイドスクリプト群（`scripts/server/`）に対して、共通のパス定数、設定ファイル（`settings.json`）の読み込み、および認証キー（Gemini APIキー等）の動的取得を提供するコア設定モジュールです。
+## 1. 目的と役割
+本ファイル `config.py` は `サーバー設定管理モジュール` として動作し、システム全体の中で重要な役割を果たします。
 
-## 2. 主要な定数とパス定義
-- `SCRIPT_DIR`: 当該スクリプトが存在するディレクトリの絶対パス (`scripts/server/`)。
-- `PROJECT_ROOT`: プロジェクトルートの絶対パス (`../../` を介して算出)。
-- `CONFIG_PATH`: `settings.json` の絶対パス。
-- `PRIVATE_DIR`: `01-private` ディレクトリの絶対パス。
-- `RULES_DIR`: `00-rules` ディレクトリの絶対パス。
-- `RESOURCES_DIR`: `04-resources` ディレクトリの絶対パス。
-- `KNOWLEDGE_DIR`: `02-knowledge` ディレクトリの絶対パス。
-- `DB_PATH`: SQLiteデータベースファイルのパス (`01-private/knowledge_index.db`)。
-- `OLLAMA_ENDPOINT`: Ollama接続先エンドポイント (`http://localhost:11434`)。
-- `EMBED_MODEL`: 埋め込み用モデル名 (`nomic-embed-text`)。
+## 2. 主要な構成要素・処理フロー
+- ファイル種別: `py`
+- 責務: サーバー設定管理モジュール
 
-## 3. 主要関数・処理フロー
-### `load_config() -> dict`
-- **目的**: 設定ファイル `settings.json` を読み込む。存在しない場合は `DEFAULT_CONFIG` をファイルに書き込んで初期作成し、それを返却する。また、読み込み時に例外が発生した場合もデフォルト設定をフォールバックとして扱う堅牢な設計となっている。
+## 3. コード内容 / 構成
+```
+import os
+import json
 
-### `get_gemini_api_key() -> str`
-- **目的**: Gemini APIの認証キーを取得する。
-- **探索順序**:
-  1. `01-private/gemini_api_key.txt`
-  2. `01-private/gemini-api-key`
-  3. `01-private/api_key.txt`
-  4. 環境変数 `GEMINI_API_KEY`
-- 上記の優先順位に従って最初に見つかった有効なキー文字列を返す。
+# ---------------------------------------------------------
+# パス定義: プロジェクトルートの絶対パスを取得 (scripts/server/ から2階層上)
+# ---------------------------------------------------------
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "../../"))
 
-## 4. 依存関係
-- 外部モジュール: `os`, `json`
-- 関連ファイル: `scripts/server/settings.json`
+# 各種ファイル・ディレクトリの絶対パス
+CONFIG_PATH = os.path.join(SCRIPT_DIR, "settings.json")
+PRIVATE_DIR = os.path.join(PROJECT_ROOT, "01-private")
+RULES_DIR = os.path.join(PROJECT_ROOT, "00-rules")
+RESOURCES_DIR = os.path.join(PROJECT_ROOT, "04-resources")
+KNOWLEDGE_DIR = os.path.join(PROJECT_ROOT, "02-knowledge")
+DB_PATH = os.path.join(PRIVATE_DIR, "knowledge_index.db")
+
+OLLAMA_ENDPOINT = "http://localhost:11434"
+EMBED_MODEL = "nomic-embed-text"
+
+# ---------------------------------------------------------
+# 設定ファイルの読み込み
+# ---------------------------------------------------------
+DEFAULT_CONFIG = {
+    "default_provider": "Ollama (Local LLM)",
+    "gemini": {
+        "default_model": "gemini-3.5-flash-lite",
+        "available_models": [
+            "gemini-3.5-flash-lite"
+        ]
+    },
+    "ollama": {
+        "default_model": "gemma4:e4b-it-q4_K_M",
+        "endpoint": "http://localhost:11434"
+    }
+}
+
+def load_config() -> dict:
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+        json.dump(DEFAULT_CONFIG, f, indent=2, ensure_ascii=False)
+    return DEFAULT_CONFIG
+
+# ---------------------------------------------------------
+# ヘルパー関数: ルート基準での Gemini API キー読み込み
+# ---------------------------------------------------------
+def get_gemini_api_key() -> str:
+    candidate_files = [
+        os.path.join(PRIVATE_DIR, "gemini_api_key.txt"),
+        os.path.join(PRIVATE_DIR, "gemini-api-key"),
+        os.path.join(PRIVATE_DIR, "api_key.txt")
+    ]
+    for file_path in candidate_files:
+        if os.path.exists(file_path):
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    key = f.read().strip()
+                    if key:
+                        return key
+            except Exception:
+                pass
+    return os.environ.get("GEMINI_API_KEY", "").strip()
+
+```
+
+## 4. 依存関係と連携
+- `scripts/server/` 内の他のモジュールとの連携。
