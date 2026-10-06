@@ -22,6 +22,29 @@ AIエージェントがファイルを作成・更新する際は本規約に従
 - TODO参照指示: "05-todo/todo.md # 05-todoに配置された次タスクファイル"
 - 関数深掘り指示: "UserModel::auth() # 次に調べる関数名"
 
+## 4. タスクファイル出力フォーマット（ `05-todo/<taskfile>.md` ）
+
+タスクリストを作成・更新する際は、必ず以下の構造・空行を維持して保存すること。
+
+```markdown
+---
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+tags: [todo, ...]
+status: active
+task:
+  - "05-todo/<taskfile>.md # 本タスクリスト"
+---
+
+# 題名
+
+## Target Directory: <path>/<to>
+
+### Tasks
+- [ ] file01
+...
+```
+
 ## 4. メタデータ (YAML Frontmatter)
 
 新規・更新ファイル先頭には必ず以下のメタデータを付与すること。
