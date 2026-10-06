@@ -1,32 +1,37 @@
 ---
 created: 2026-10-06
 updated: 2026-10-06
-source: ["04-resources/scripts/server/rag_service.py"]
-tags: [server, rag, vector, sqlite, python]
+source: ["scripts/server/rag_service.py"]
+tags: [server, rag-service, python]
 status: active
 phase: 5
 parent: []
 children: []
-related: ["scripts/server/config.py"]
-task: ["scripts/server/rag_service.py # RAG検索サービスモジュール"]
-summary: "scripts/server/rag_service.py は、Ollamaを用いた質問文のベクトル化、コサイン類似度の算出、およびSQLiteナレッジインデックスDBを活用した高精度なRAG（検索拡張生成）の検索サービスを提供するモジュールである。"
+related: ["scripts/server/config.py", "scripts/server/knowledge_service.py", "scripts/server/llm_client.py", "scripts/server/start-webui.py"]
+task: ["scripts/server/rag_service.py # rag_service.pyの静的解析"]
+summary: "Ollama Embeddings APIを用いたクエリベクトル化、コサイン類似度計算、SQLiteインデックスからの高度なセマンティック検索を行うRAGサービスモジュール。"
 ---
 
 # rag_service.py 解析ノート
 
-## 1. 概要
-`scripts/server/rag_service.py` は、ナレッジベース内からユーザーの質問に対して関連性の高いドキュメントを検索・抽出する RAG (Retrieval-Augmented Generation) のバックエンドロジックを提供します。
+## 概要
+`scripts/server/rag_service.py` は、パーソナルナレッジベースにおいて、ユーザーの質問クエリに対するセマンティック検索（RAG: Retrieval-Augmented Generation）を実現するためのサービスモジュールです。
 
-## 2. 主要関数
-### `get_query_embedding(text: str) -> list[float]`
-- 引数のテキストを Ollama の埋め込みモデル（`nomic-embed-text`）に送信し、数値ベクトル（埋め込み表現）を取得・返却します。
-- 接続エラーが発生した場合はエラーを出力し、空リストを返します。
+## 主要な関数と処理フロー
 
-### `cosine_similarity(v1: list[float], v2: list[float]) -> float`
-- 2つのベクトル間のコサイン類似度（余弦類似度）を計算します。
-- ベクトルの次元数が異なる場合やノルムが 0 の場合は安全に `0.0` を返します。
+### 1. クエリベクトル化 (`get_query_embedding`)
+- 指定されたテキストクエリを Ollama の Embeddings API（`{OLLAMA_ENDPOINT}/api/embeddings`）へ送信し、モデル（`nomic-embed-text`）を用いたベクトル表現（浮動小数点数リスト）を取得します。
 
-### `search_relevant_knowledge(query: str, top_k: int = 3, target_categories: list[str] = None) -> list[dict]`
-- SQLite データベース (`knowledge_index.db`) からナレッジ情報を取得します。
-- 指定されたカテゴリ（`target_categories`）がある場合はフィルタリングを行います。
-- クエリのベクトルと各ドキュメントのベクトル間のコサイン類似度を計算し、類似度スコアが高い順に上位 `top_k` 件のドキュメント（パス、カテゴリ、タイトル、概要、本文、スコア）を返却します。
+### 2. コサイン類似度計算 (`cosine_similarity`)
+- 2つのベクトル間のコサイン類似度を計算し、方向の一致度（0.0 〜 1.0）を算出します。
+- ゼロ除算や次元数不一致に対する安全なガード処理が含まれています。
+
+### 3. ナレッジ類似度検索 (`search_relevant_knowledge`)
+- SQLite データベース（`DB_PATH`）から、指定されたカテゴリフィルター条件に従ってインデックスデータ（パス、カテゴリ、タイトル、概要、本文、ベクトル）を取得します。
+- 各ドキュメントのベクトル (`emb_str`) を JSON パースし、クエリベクトルとのコサイン類似度を計算します。
+- 類似度スコアの降順でソートし、上位 `top_k` 件の関連ドキュメント情報を抽出して返却します。
+
+## 依存関係
+- 標準ライブラリ: `os`, `sqlite3`, `math`, `json`, `urllib.request`
+- 内部モジュール: `config` (`DB_PATH`, `OLLAMA_ENDPOINT`, `EMBED_MODEL`)
+- 被依存モジュール: `start-webui.py`

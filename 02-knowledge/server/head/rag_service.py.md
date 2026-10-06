@@ -1,13 +1,13 @@
 ---
 created: 2026-10-06
 updated: 2026-10-06
-source: ["04-resources/scripts/server/rag_service.py"]
-tags: [server, rag, vector, sqlite, python]
+source: ["scripts/server/rag_service.py"]
+tags: [server, rag-service, python]
 status: active
 phase: 5
 parent: []
 children: []
-related: ["scripts/server/config.py"]
-task: ["scripts/server/rag_service.py # RAG検索サービスモジュール"]
-summary: "scripts/server/rag_service.py は、Ollamaを用いた質問文のベクトル化、コサイン類似度の算出、およびSQLiteナレッジインデックスDBを活用した高精度なRAG（検索拡張生成）の検索サービスを提供するモジュールである。"
+related: ["scripts/server/config.py", "scripts/server/knowledge_service.py", "scripts/server/llm_client.py", "scripts/server/start-webui.py"]
+task: ["scripts/server/rag_service.py # rag_service.pyの静的解析"]
+summary: "Ollama Embeddings APIを用いたクエリベクトル化、コサイン類似度計算、SQLiteインデックスからの高度なセマンティック検索を行うRAGサービスモジュール。"
 ---
