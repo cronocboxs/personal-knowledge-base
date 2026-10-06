@@ -7,13 +7,13 @@ task:
   - "05-todo/sublimation-todo.md # 本タスクリスト"
 ---
 
-# サーバー側スクリプト解析タスクリスト
+# scripts/server/ 解析タスクリスト
 
 ## Target Directory: scripts/server/
 
 ### Tasks
-- [x] config.py
-- [x] knowledge_service.py
-- [x] llm_client.py
-- [x] rag_service.py
-- [x] start-webui.py
+- [x] scripts/server/config.py
+- [x] scripts/server/rag_service.py
+- [x] scripts/server/knowledge_service.py
+- [x] scripts/server/llm_client.py
+- [x] scripts/server/start-webui.py
