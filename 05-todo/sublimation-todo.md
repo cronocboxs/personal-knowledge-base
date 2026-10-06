@@ -1,22 +1,19 @@
 ---
 created: 2026-10-06
 updated: 2026-10-06
-tags: [todo, sublimation, server]
+tags: [todo, sublimation, scripts-server]
 status: active
 task:
-  - "scripts/server/ # 解析対象スクリプト群"
+  - "05-todo/sublimation-todo.md # scripts/server/ 解析タスクリスト"
 ---
 
-# Sublimation Todo: scripts/server/
+# scripts/server/ 解析タスクリスト
 
 ## Target Directory: scripts/server/
 
 ### Tasks
-- [x] scripts/server/config.py
-- [x] scripts/server/knowledge_service.py
-- [x] scripts/server/llm_client.py
-- [x] scripts/server/rag_service.py
-- [x] scripts/server/start-webui.py
-- [ ] scripts/server/llm_client.py
-- [ ] scripts/server/rag_service.py
-- [ ] scripts/server/start-webui.py
+- [x] config.py
+- [x] knowledge_service.py
+- [x] llm_client.py
+- [x] rag_service.py
+- [x] start-webui.py

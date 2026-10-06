@@ -2,12 +2,12 @@
 created: 2026-10-06
 updated: 2026-10-06
 source: ["scripts/server/settings.json"]
-tags: [server, scripts, python]
+tags: [config, json, server]
 status: active
-phase: 5
+phase: 3
 parent: []
 children: []
-related: []
-task: ["scripts/server/settings.json"]
-summary: "Static analysis and knowledge note for settings.json in scripts/server/"
+related: ["scripts/server/config.py"]
+task: ["scripts/server/settings.json # settings.jsonの設定項目とモデル定義の解析"]
+summary: "scripts/server/settings.json は、WebUIサーバー等のデフォルトプロバイダやGemini/Ollamaのモデル設定を保持するJSON設定ファイル。"
 ---

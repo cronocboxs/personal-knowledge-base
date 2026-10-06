@@ -2,93 +2,36 @@
 created: 2026-10-06
 updated: 2026-10-06
 source: ["scripts/server/config.py"]
-tags: [server, scripts, python]
+tags: [config, server, python]
 status: active
-phase: 5
+phase: 3
 parent: []
 children: []
-related: []
-task: ["scripts/server/config.py"]
-summary: "Static analysis and knowledge note for config.py in scripts/server/"
+related: ["scripts/server/settings.json", "scripts/server/rag_service.py", "scripts/server/knowledge_service.py", "scripts/server/llm_client.py"]
+task: ["scripts/server/config.py # config.pyの構造とパス定義・設定読み込み処理の解析"]
+summary: "scripts/server/config.py はプロジェクトのパス設定、環境設定ファイル(settings.json)の読み込み、APIキー取得などの基本設定を提供する。"
 ---
 
 # config.py 解析ノート
 
-## 概要
-`scripts/server/config.py` の静的解析結果および主要構造のドキュメント。
+## 1. 概要
+`scripts/server/config.py` は、パーソナルナレッジベースのサーバーサイドスクリプト群における共通設定・パス解決・APIキー管理等を一元的に提供するモジュールです。
 
-## ソースコード / 設定内容
-```
-import os
-import json
+## 2. パス定義と定数
+- **`PROJECT_ROOT`**: カレントスクリプト位置を基準に2階層上のルートディレクトリ絶対パスを算出します。
+- **`CONFIG_PATH`**: `settings.json` の絶対パス。
+- **`PRIVATE_DIR`**, **`RULES_DIR`**, **`RESOURCES_DIR`**, **`KNOWLEDGE_DIR`**: 各主要ディレクトリのパス。
+- **`DB_PATH`**: `01-private/knowledge_index.db` のパス。
+- **`OLLAMA_ENDPOINT`**, **`EMBED_MODEL`**: ローカルLLM/埋め込み用のデフォルト設定値。
 
-# ---------------------------------------------------------
-# パス定義: プロジェクトルートの絶対パスを取得 (scripts/server/ から2階層上)
-# ---------------------------------------------------------
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "../../"))
+## 3. 主要関数
+### `load_config() -> dict`
+- `settings.json` が存在する場合はJSON形式で読み込み、存在しない場合はデフォルト設定（`DEFAULT_CONFIG`）をファイルに書き出して返却します。
 
-# 各種ファイル・ディレクトリの絶対パス
-CONFIG_PATH = os.path.join(SCRIPT_DIR, "settings.json")
-PRIVATE_DIR = os.path.join(PROJECT_ROOT, "01-private")
-RULES_DIR = os.path.join(PROJECT_ROOT, "00-rules")
-RESOURCES_DIR = os.path.join(PROJECT_ROOT, "04-resources")
-KNOWLEDGE_DIR = os.path.join(PROJECT_ROOT, "02-knowledge")
-DB_PATH = os.path.join(PRIVATE_DIR, "knowledge_index.db")
+### `get_gemini_api_key() -> str`
+- `01-private/` 配下の指定ファイル群（`gemini_api_key.txt`, `gemini-api-key`, `api_key.txt`）からAPIキーを探索して読み込みます。
+- ファイルが見つからない場合は環境変数 `GEMINI_API_KEY` をフォールバックとして取得します。
 
-OLLAMA_ENDPOINT = "http://localhost:11434"
-EMBED_MODEL = "nomic-embed-text"
-
-# ---------------------------------------------------------
-# 設定ファイルの読み込み
-# ---------------------------------------------------------
-DEFAULT_CONFIG = {
-    "default_provider": "Ollama (Local LLM)",
-    "gemini": {
-        "default_model": "gemini-3.5-flash-lite",
-        "available_models": [
-            "gemini-3.5-flash-lite"
-        ]
-    },
-    "ollama": {
-        "default_model": "gemma4:e4b-it-q4_K_M",
-        "endpoint": "http://localhost:11434"
-    }
-}
-
-def load_config() -> dict:
-    if os.path.exists(CONFIG_PATH):
-        try:
-            with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            pass
-    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-        json.dump(DEFAULT_CONFIG, f, indent=2, ensure_ascii=False)
-    return DEFAULT_CONFIG
-
-# ---------------------------------------------------------
-# ヘルパー関数: ルート基準での Gemini API キー読み込み
-# ---------------------------------------------------------
-def get_gemini_api_key() -> str:
-    candidate_files = [
-        os.path.join(PRIVATE_DIR, "gemini_api_key.txt"),
-        os.path.join(PRIVATE_DIR, "gemini-api-key"),
-        os.path.join(PRIVATE_DIR, "api_key.txt")
-    ]
-    for file_path in candidate_files:
-        if os.path.exists(file_path):
-            try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    key = f.read().strip()
-                    if key:
-                        return key
-            except Exception:
-                pass
-    return os.environ.get("GEMINI_API_KEY", "").strip()
-
-```
-
-## 処理フロー・責務
-- ファイルの役割と依存関係の解析。
-- サーバスクリプト群における位置づけと仕様。
+## 4. 依存関係
+- 標準ライブラリ: `os`, `json`
+- 関連ファイル: `scripts/server/settings.json`, `scripts/server/rag_service.py`, `scripts/server/knowledge_service.py`, `scripts/server/llm_client.py`
