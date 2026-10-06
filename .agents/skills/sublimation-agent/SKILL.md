@@ -47,7 +47,7 @@ description: 指定されたコード群を自律解読し、02-knowledge/ へ�
 2. **静的解析とノート生成（1ファイルずつ処理）**:
    - リスト内で `[ ]` となっているファイルを1つ読み込む。
    - `02-knowledge/<category>/head/` および `note/` 配下に解析ドキュメントを作成する。
-   - 作成完了後、`05-todo/sublimation-todo.md` 内の該当ファイルに `[x]` マークを付けて更新保存する。
+   - 作成完了後、リスト内の該当ファイルに `[x]` マークを付けて更新保存する。
 3. **インデックス更新 & Gitコミット**:
    - `python3 scripts/index/update-index.py` をシェル（`shell`）経由で実行し、変更を `git commit` する。
 
