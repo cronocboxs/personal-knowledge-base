@@ -9,7 +9,7 @@ cd "${PROJECT_DIR}"
 
 # デフォルト値の設定
 TARGET_PATH="04-resources/"
-INSTRUCTION="sublimation-agent"
+INSTRUCTION="agent"
 FORCE_FLG="false"
 CATEGORY="auto"
 

@@ -3,11 +3,11 @@ created: 2026-10-06
 updated: 2026-10-06
 source: ["scripts/server/config.py"]
 tags: [server, config, python]
-status: draft
-phase: 1
+status: active
+phase: 3
 parent: []
 children: []
-related: ["scripts/server/knowledge_service.py", "scripts/server/llm_client.py"]
-task: []
-summary: "scripts/server/config.pyの絶対パス定義、設定ファイルの読み込み、APIキー取得等の設定管理機能。"
+related: ["scripts/server/settings.json", "scripts/server/knowledge_service.py", "scripts/server/llm_client.py", "scripts/server/rag_service.py", "scripts/server/start-webui.py"]
+task: ["scripts/server/config.py # 設定管理モジュールの静的解析ノート"]
+summary: "プロジェクトルートやプライベートディレクトリのパス定義、設定ファイル(settings.json)のロード、Gemini APIキーの取得などサーバー全体の設定管理を行うモジュール。"
 ---

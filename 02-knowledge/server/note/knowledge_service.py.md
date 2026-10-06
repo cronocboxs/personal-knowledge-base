@@ -4,46 +4,47 @@ updated: 2026-10-06
 source: ["scripts/server/knowledge_service.py"]
 tags: [server, knowledge-service, python]
 status: active
-phase: 5
+phase: 3
 parent: []
 children: []
-related: ["scripts/server/config.py", "scripts/server/llm_client.py", "scripts/server/rag_service.py", "scripts/server/start-webui.py"]
-task: ["scripts/server/knowledge_service.py # knowledge_service.pyの静的解析"]
-summary: "プロンプトパス解決、規約・既存ノート読み込み、LLMを用いたメタデータ抽出と本文解析による二層ノート生成サービスモジュール。"
+related: ["scripts/server/config.py", "scripts/server/llm_client.py"]
+task: ["scripts/server/knowledge_service.py # 知識生成・プロンプト解決・メタデータ抽出サービスモジュールの静的解析ノート"]
+summary: "プロンプトテンプレートの解決、ルール・既存ノートコンテキストの読み込み、LLMを用いた二層ナレッジ（YAML Frontmatter＋本文）の自動生成・カテゴリ判定を行うサービスモジュール。"
 ---
 
 # knowledge_service.py 解析ノート
 
-## 概要
-`scripts/server/knowledge_service.py` は、パーソナルナレッジベースにおいて、LLMを用いたコード解析やRAGの回答内容から構造化されたナレッジファイル（`head/` および `note/`）を自動生成するためのコアサービスモジュールです。
+## 1. 概要
+`scripts/server/knowledge_service.py` は、サーバーサイドでLLMやSQLite、プロジェクト規約を組み合わせて、外部資料やコード群からパーソナルナレッジ（二層ノート形式: `head/` および `note/`）を自動生成・推論するコアサービスモジュールです。
 
-## 主要な関数と責務
+## 2. 主要関数
 
-### 1. プロンプトパス解決 (`resolve_prompt_path`)
-- 指定されたプロンプト名やパス（ファイル名、相対パス、スキル名）を探索し、存在する場合は対応する絶対パスへ解決して返します。
-- 探索順序:
-  1. 絶対・相対ファイルの直接存在確認
-  2. `00-rules/prompts/` 配下
-  3. `.agents/skills/<prompt_input>/SKILL.md`
-  4. `00-rules/skills/<prompt_input>/SKILL.md`
+### `resolve_prompt_path(prompt_input: str) -> str`
+- **目的**: 指示書指定（ファイル名、パス、スキル名）を適切な絶対パスへ解決する。
+- **検索先**: `00-rules/prompts/`, `.agents/skills/`, `00-rules/skills/`。
 
-### 2. 規約・コンテキスト読み込み
-- `load_rule_docs()`: `AGENTS.md` および `00-rules/` 配下の主要規約（`formatting.md`, `workflow.md`, `agent-behavior.md`）を結合してロードします。
-- `get_existing_notes_context()`: SQLite データベース (`DB_PATH`) から既存のナレッジ一覧（タイトル、パス、概要）を取得し、LLMへのコンテキストとして提供します。
+### `get_available_prompts() -> list[str]`
+- **目的**: `00-rules/prompts/` 内の `.md` ファイル一覧を取得する。
 
-### 3. JSONパース補助 (`clean_and_parse_json`)
-- LLMが生成した不完全またはエスケープ不備のあるJSON文字列を、正規表現を用いて安全にパース可能な形にクリーニング・補正して `json.loads` を実行します。
+### `load_rule_docs() -> str`
+- **目的**: `AGENTS.md`, `formatting.md`, `workflow.md`, `agent-behavior.md` などの主要規約ファイルを結合してコンテキスト文字列として返す。
 
-### 4. 二層ノート生成 (`generate_knowledge_files`)
-- **PASS 1 (メタデータ抽出)**: 規約と既存ノートをコンテキストとしてLLMに渡し、カテゴリ、タグ、サマリー、リレーション（parent, children, related）をJSON形式で自動判定させます。
-- **PASS 2 (本文解析生成)**: 指定されたプロンプトテンプレートと対象データに基づき、LLMに技術解説Markdown本文を生成させます。
-- 最終的に `head_content`（Frontmatterのみ）と `note_content`（Frontmatter ＋ 本文）を辞書として返却します。
+### `get_existing_notes_context(category_filter: str = None) -> str`
+- **目的**: SQLite (`knowledge_index.db`) から既存ノートのタイトル・パス・概要を取得し、LLMへの参照コンテキストとして整形する。
 
-### 5. RAG回答自動昇華 (`auto_sublimate_rag_answer`)
-- RAGの質疑応答結果を入力として、同様にLLMを用いて適切なタイトル、カテゴリ、メタデータを抽出・生成し、ナレッジノート化します。
+### `clean_and_parse_json(json_str: str) -> dict`
+- **目的**: LLM出力の不完全なJSON文字列やエスケープミスを自動修復してパースする。
 
-## 依存関係
+### `generate_knowledge_files(...) -> dict`
+- **目的**: 2パス方式でナレッジノートを生成する。
+  - **PASS 1**: カテゴリ判定 & YAMLメタデータの抽出 (JSON出力)
+  - **PASS 2**: 選択された指示書テンプレートに基づく本文解析の生成 (Raw Markdown)
+- **戻り値**: 推察されたカテゴリ、ヘッドコンテンツ、ノートコンテンツを含む辞書。
+
+### `auto_sublimate_rag_answer(...) -> dict`
+- **目的**: RAGの質問と回答の対話内容から、自動的にナレッジノート（タイトル・カテゴリ・概要・メタデータ）を昇華生成する。
+
+## 3. 依存関係
 - 標準ライブラリ: `os`, `re`, `json`, `sqlite3`, `pathlib`
-- 外部ライブラリ: `streamlit`
+- 外部パッケージ: `streamlit`
 - 内部モジュール: `config`, `llm_client`
-- 被依存モジュール: `rag_service.py`, `start-webui.py`
